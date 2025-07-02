@@ -1,6 +1,7 @@
 # Shadow Finance System- Assistente Financeiro
 
-![Banner do Projeto](link_para_a_imagem_do_painel_de_controle.png)
+![Imagem do WhatsApp de 2025-06-30 à(s) 18 48 29_6f1ce7f1](https://github.com/user-attachments/assets/eac28cd8-9f51-4c68-9b37-25802b44af69)
+
 ## 🚀 Sobre o Projeto
 
 **Shadow Finance** é um assistente financeiro completo, projetado para oferecer uma visão clara e controle total sobre a vida financeira do usuário, com foco em investimentos, dividendos e despesas.
@@ -33,6 +34,7 @@ Este repositório contém o código do **Front-End**, desenvolvido com **Next.js
 | **Tailwind CSS** | Framework CSS para estilização rápida e consistente. |
 | **Axios** | Cliente HTTP para consumo da API back-end. |
 | **Zustand** | Gerenciamento de estado global da aplicação. |
+| **ShadcnUI** | biblioteca de componentes UI moderna baseada em Tailwind. |
 
 ---
 

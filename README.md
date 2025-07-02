@@ -8,7 +8,7 @@
 
 Este repositório contém o código do **Front-End**, desenvolvido com **Next.js**, que consome uma API RESTful construída separadamente com Django REST Framework.
 
-**🔗 Link para o repositório do Back-End:** `[Link para o seu futuro repo do back-end]`
+**🔗 Link para o repositório do Back-End:** `disponivel ainda essa semana`
 
 ---
 

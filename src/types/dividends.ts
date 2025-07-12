@@ -1,19 +1,15 @@
-export type Ativo = {
+import { type Asset } from '@base/types/assets';
+
+export type ItemDividend = {
     id: number;
-    codigo: string;
-    tipo: 'FII' | 'ACAO' | 'ETF' | 'BDR';
+    asset: Asset;
+    value: string;
+    received_date: string;
 };
 
-export type ItemDividendo = {
+export type DividendMonth = {
     id: number;
-    ativo: Ativo;
-    valor: number;
-    data: string;
-};
-
-export type DividendoMes = {
-    id: number;
-    mes: number;
-    ano: number;
-    itens: ItemDividendo[]
+    month: number;
+    year: number;
+    itens: ItemDividend[]
 };

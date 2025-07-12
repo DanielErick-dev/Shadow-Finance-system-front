@@ -1,8 +1,8 @@
 "use client";
 import { DividendCard } from "@base/components/dividends/ListDividend";
 import { useMemo, useEffect, useState } from "react";
-import { useDividendStore } from "@base/store/UseDividendsStore";
-import { useAtivosStore } from "@base/store/UseAtivoStore";
+import { useDividendsStore } from "@base/store/useDividendsStore";
+import { useAssetsStore } from "@base/store/useAssetsStore";
 import { Label } from "@base/components/ui/label";
 import GenericFormModal from "@base/components/ui/custom/GenericFormModal";
 import PrivateRoute from "@base/components/layout/PrivateRoute";
@@ -20,23 +20,23 @@ export default function DividendPage(){
         updateDividend,
         deleteDividend,
         addMonthCard,
-        deleteCard } = useDividendStore();
-    const { ativos, loading: ativosLoading, error: ativosError, fetchAtivos} = useAtivosStore();
+        deleteCard } = useDividendsStore();
+    const { assets, loading: assetsLoading, error: assetsError, fetchAssets} = useAssetsStore();
     const [isSubmittingMonth, setIsSubmittingMonth] = useState(false);
     const [currentPage, setCurrentPage] = useState(1)
     const itensPerPage = 3
     const [newMonthData, setNewMonthData] = useState({
-        mes: new Date().getMonth() + 1,
-        ano: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
     });
     const [filters, setFilters] = useState({
-        ano: '',
-        mes: '',
+        year: '',
+        month: '',
     })
     useEffect(() => {
         fetchDividends(filters, currentPage);
-        fetchAtivos();
-    }, [fetchDividends, fetchAtivos, filters, currentPage])
+        fetchAssets();
+    }, [fetchDividends, fetchAssets, filters, currentPage])
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     }
@@ -50,7 +50,7 @@ export default function DividendPage(){
         }));
     }
     const clearFilters = () => {
-        setFilters({ ano: '', mes: ''});
+        setFilters({ year: '', month: ''});
     }
     const handleAddMonthSubmit = async () => {
         setIsSubmittingMonth(true);
@@ -72,19 +72,19 @@ export default function DividendPage(){
     const anosDisponiveis = [2025, 2024, 2023]
     const mesesDoAno = Array.from({ length: 12 }, (_, i) => ({
         valor: i + 1,
-        nome: new Date(0, i).toLocaleString('pt-BR', { month: 'long' })
+        name: new Date(0, i).toLocaleString('pt-BR', { month: 'long' })
     }))
 
     const sortedCards = useMemo(() => {
         return [...cards].sort((a, b) => {
-            if (b.ano !== a.ano){
-                return b.ano - a.ano;
+            if (b.year !== a.year){
+                return b.year - a.year;
             }
-            return b.mes - a.mes;
+            return b.month - a.month;
         });
     }, [cards]);
     
-    if (dividendsLoading || ativosLoading) {
+    if (dividendsLoading || assetsLoading) {
         return (
             <div className="flex h-screen items-center justify-center bg-slate-950">
                 <p className="text-lg text-purple-400 animate-pulse">
@@ -93,12 +93,12 @@ export default function DividendPage(){
             </div>
         )
     }
-    if (dividendsError || ativosError) {
+    if (dividendsError || assetsError) {
         return (
             <div className="flex h-screen items-center justify-center bg-slate-950">
                 <div className="rounded-lg border border-red-500/50 bg-red-900/20 p-6 text-center">
                     <h3 className="text-lg font-bold text-red-400">[ ERRO DE CONEXÃO ]</h3>
-                    <p className="text-red-400/80 mt-2">{dividendsError || ativosError}</p>
+                    <p className="text-red-400/80 mt-2">{dividendsError || assetsError}</p>
                 </div>
             </div>
         )
@@ -135,37 +135,37 @@ export default function DividendPage(){
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <Label 
-                                        htmlFor="mes"
+                                        htmlFor="month"
                                         className="text-sm font-semibold text-purple-300 tracking-wide"
                                     >
                                         Mês
                                     </Label>
                                     <select 
-                                        name="mes"
-                                        id="mes"
-                                        value={newMonthData.mes}
+                                        name="month"
+                                        id="month"
+                                        value={newMonthData.month}
                                         onChange={handleNewMonthChange}
                                         className="block w-full bg-slate-800 border-2 border-slate-700 focus:border-purple-500 focus:ring-purple-500 rounded-md shadow-sm p-2.5"
                                     >
-                                        {mesesDoAno.map((mes) => (
-                                            <option key={mes.valor} value={mes.valor}>
-                                                {mes.nome.charAt(0).toUpperCase() + mes.nome.slice(1)}
+                                        {mesesDoAno.map((month) => (
+                                            <option key={month.valor} value={month.valor}>
+                                                {month.name.charAt(0).toUpperCase() + month.name.slice(1)}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
                                     <Label 
-                                        htmlFor="ano"
+                                        htmlFor="year"
                                         className="text-sm font-semibold text-purple-300 tracking-wide"
                                     >
                                         Ano
                                     </Label>
                                     <input 
                                         type="number"
-                                        name="ano"
-                                        id="ano"
-                                        value={newMonthData.ano}
+                                        name="year"
+                                        id="year"
+                                        value={newMonthData.year}
                                         onChange={handleNewMonthChange}
                                         className="block w-full bg-slate-800 border-2 border-slate-700
                                         focus:border-purple-500 focus:ring-purple-500 rounded-md shadow-sm p-2.5"
@@ -187,28 +187,28 @@ export default function DividendPage(){
                         
                         <div className="w-full md:w-auto">
                             <select 
-                                name="ano" 
-                                value={filters.ano} 
+                                name="year" 
+                                value={filters.year} 
                                 onChange={handleFilterChange}
                                 className="w-full bg-slate-900 border border-slate-600 rounded-md p-2 text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                             >
                                 <option value="">Todos os Anos</option>
-                                {anosDisponiveis.map(ano => <option key={ano} value={ano}>{ano}</option>)}
+                                {anosDisponiveis.map(year => <option key={year} value={year}>{year}</option>)}
                             </select>
                         </div>
 
                         
                         <div className="w-full md:w-auto">
                             <select 
-                                name="mes" 
-                                value={filters.mes} 
+                                name="month" 
+                                value={filters.month} 
                                 onChange={handleFilterChange}
                                 className="w-full bg-slate-900 border border-slate-600 rounded-md p-2 text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                             >
                                 <option value="">Todos os Meses</option>
-                                {mesesDoAno.map(mes => (
-                                    <option key={mes.valor} value={mes.valor}>
-                                        {mes.nome.charAt(0).toUpperCase() + mes.nome.slice(1)}
+                                {mesesDoAno.map(month => (
+                                    <option key={month.valor} value={month.valor}>
+                                        {month.name.charAt(0).toUpperCase() + month.name.slice(1)}
                                     </option>
                                 ))}
                             </select>
@@ -243,7 +243,7 @@ export default function DividendPage(){
                                 onAddDividend={addDividend}
                                 onUpdateDividend={updateDividend}
                                 onDeleteDividend={deleteDividend}
-                                ativosDisponiveis={ativos}
+                                ativosDisponiveis={assets}
                                 onDeleteCard={deleteCard}
                             />
                         ))}

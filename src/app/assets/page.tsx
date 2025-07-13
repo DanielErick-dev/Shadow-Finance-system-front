@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { useAssetsStore } from "@base/store/useAssetsStore";
 import { useConfirmation } from "@base/contexts/ConfirmationDialogContext";
-import AddAtivoModalWrapper from "@base/components/ativos/AddAtivoModalWrapper";
-import EditAtivoModalWrapper from "@base/components/ativos/EditAtivoModalWrapper";
+import AddAssetModalWrapper from "@base/components/ativos/AddAssetModalWrapper";
+import EditAssetModalWrapper from "@base/components/ativos/EditAssetModalWrapper";
 import BackButton from "@base/components/ui/custom/backButton";
 import type { Asset } from "@base/types/assets";
 import { Pencil, Trash2, Wallet } from 'lucide-react';
@@ -12,7 +12,7 @@ import PrivateRoute from "@base/components/layout/PrivateRoute";
 export default function AtivosPage() {
     const { assets, loading, error, fetchAssets, deleteAsset } = useAssetsStore();
     const { confirm } = useConfirmation();
-    const [ativoParaEditar, setAtivoParaEditar] = useState<Asset | null>(null);
+    const [assetToEdit, setAssetToEdit] = useState<Asset | null>(null);
 
     useEffect(() => {
         fetchAssets();
@@ -51,7 +51,7 @@ export default function AtivosPage() {
                             <h1 className="text-4xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 mb-4 sm:mb-0">
                                 [ GESTÃO DE ATIVOS ]
                             </h1>
-                            <AddAtivoModalWrapper />
+                            <AddAssetModalWrapper />
                         </header>
                         <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-lg shadow-purple-900/20 overflow-hidden">
                             <table className="w-full text-left">
@@ -69,7 +69,7 @@ export default function AtivosPage() {
                                             <td className="p-4 text-slate-400">{asset.type}</td>
                                             <td className="p-4">
                                                 <div className="flex justify-end items-center gap-3">
-                                                    <button onClick={() => setAtivoParaEditar(asset)} className="p-2 rounded-full hover:bg-slate-700 group" aria-label="Editar Ativo">
+                                                    <button onClick={() => setAssetToEdit(asset)} className="p-2 rounded-full hover:bg-slate-700 group" aria-label="Editar Ativo">
                                                         <Pencil className="w-4 h-4 text-slate-400 group-hover:text-blue-400 transition-colors" />
                                                     </button>
                                                     <button onClick={() => handleDeleteClick(asset)} className="p-2 rounded-full hover:bg-slate-700 group" aria-label="Excluir Ativo">
@@ -90,9 +90,9 @@ export default function AtivosPage() {
                         </div>
                     </div>
                 </div>
-                <EditAtivoModalWrapper
-                    ativoToEdit={ativoParaEditar}
-                    onClose={() => setAtivoParaEditar(null)}
+                <EditAssetModalWrapper
+                    assetToEdit={assetToEdit}
+                    onClose={() => setAssetToEdit(null)}
                 />
             </>
         </PrivateRoute>

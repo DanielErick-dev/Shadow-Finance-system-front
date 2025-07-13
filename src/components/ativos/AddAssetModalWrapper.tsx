@@ -1,18 +1,21 @@
 "use client"
 import { useState } from 'react'
+import { type Asset } from '@base/types/assets'
 import GenericFormModal from '@base/components/ui/custom/GenericFormModal'
-import { useAtivosStore, type NewAtivoData } from '@base/store/UseAtivoStore'
+import { useAssetsStore } from '@base/store/useAssetsStore'
 import { Input } from '@base/components/ui/input'
 import { Label } from '@base/components/ui/label'
 
+type NewAssetData = Omit<Asset, 'id'>
+
 export default function AddAtivoModalWrapper() {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState<NewAtivoData>({
-        codigo: '',
-        tipo: 'ACAO', 
+    const [formData, setFormData] = useState<NewAssetData>({
+        code: '',
+        type: 'ACAO', 
     });
 
-    const { addAtivo } = useAtivosStore();
+    const { addAsset } = useAssetsStore();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -23,8 +26,8 @@ export default function AddAtivoModalWrapper() {
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
-            await addAtivo(formData);
-            setFormData({ codigo: '', tipo: 'ACAO' });
+            await addAsset(formData);
+            setFormData({ code: '', type: 'ACAO' });
         } catch (error) {
             console.error("Falha na submissão do formulário de ativo.", error);
             throw error;
@@ -61,13 +64,13 @@ export default function AddAtivoModalWrapper() {
         >
             <div className="space-y-4">
                 <div className="space-y-2">
-                    <Label htmlFor="codigo" className="text-sm font-semibold text-purple-300 tracking-wide">
+                    <Label htmlFor="code" className="text-sm font-semibold text-purple-300 tracking-wide">
                         CÓDIGO DO ATIVO
                     </Label>
                     <Input
-                        id="codigo"
-                        name="codigo"
-                        value={formData.codigo}
+                        id="code"
+                        name="code"
+                        value={formData.code}
                         onChange={handleChange}
                         placeholder="Ex: MXRF11"
                         disabled={isSubmitting}
@@ -76,13 +79,13 @@ export default function AddAtivoModalWrapper() {
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="tipo" className="text-sm font-semibold text-purple-300 tracking-wide">
+                    <Label htmlFor="type" className="text-sm font-semibold text-purple-300 tracking-wide">
                         TIPO
                     </Label>
                     <select
-                        id="tipo"
-                        name="tipo"
-                        value={formData.tipo}
+                        id="type"
+                        name="type"
+                        value={formData.type}
                         onChange={handleChange}
                         disabled={isSubmitting}
                         className="block w-full bg-slate-800 border-2 border-slate-700 focus:border-purple-500 focus:ring-purple-500 text-white rounded-md shadow-sm p-2.5"

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { type Asset } from '@base/types/assets'
 import { type ItemDividend } from '@base/types/dividends';
-import AddAtivoModalWrapper from '@base/components/ativos/AddAtivoModalWrapper';
+import AddAssetModalWrapper from '@base/components/ativos/AddAssetModalWrapper';
 import toast from 'react-hot-toast';
 
 export type DividendFormData = {
@@ -91,7 +91,7 @@ export function AddDividendForm({
                 <label htmlFor='ativoCodigo' className='block text-sm font-medium text-purple-300'>
                     Ativo
                 </label>
-                <AddAtivoModalWrapper />
+                <AddAssetModalWrapper />
             </div>
             <select
                 id='assetCode'

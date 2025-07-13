@@ -1,30 +1,32 @@
 "use client";
 import { useState, useEffect } from 'react';
 import GenericFormModal from '@base/components/ui/custom/GenericFormModal';
-import { useAtivosStore, type NewAtivoData } from '@base/store/UseAtivoStore';
+import { useAssetsStore } from '@base/store/useAssetsStore';
 import { Input } from '@base/components/ui/input';
 import { Label } from '@base/components/ui/label';
-import type { Ativo } from '@base/types/dividends';
+import type { Asset } from '@base/types/assets';
 
-type EditAtivoModalWrapperProps = {
-    ativoToEdit: Ativo | null; 
+type NewAssetData = Omit<Asset, 'id'>
+
+type EditAssetModalWrapperProps = {
+    assetToEdit: Asset | null; 
     onClose: () => void;
 };
 
-export default function EditAtivoModalWrapper({ ativoToEdit, onClose }: EditAtivoModalWrapperProps) {
+export default function EditAtivoModalWrapper({ assetToEdit, onClose }: EditAssetModalWrapperProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState<NewAtivoData>({ codigo: '', tipo: 'ACAO' });
+    const [formData, setFormData] = useState<NewAssetData>({ code: '', type: 'ACAO' });
 
-    const { updateAtivo } = useAtivosStore();
+    const { updateAsset } = useAssetsStore();
 
     useEffect(() => {
-        if (ativoToEdit) {
+        if (assetToEdit) {
             setFormData({
-                codigo: ativoToEdit.codigo,
-                tipo: ativoToEdit.tipo,
+                code: assetToEdit.code,
+                type: assetToEdit.type,
             });
         }
-    }, [ativoToEdit]);
+    }, [assetToEdit]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -33,11 +35,11 @@ export default function EditAtivoModalWrapper({ ativoToEdit, onClose }: EditAtiv
     };
 
     const handleSubmit = async () => {
-        if (!ativoToEdit) return;
+        if (!assetToEdit) return;
 
         setIsSubmitting(true);
         try {
-            await updateAtivo(ativoToEdit.id, formData);
+            await updateAsset(assetToEdit.id, formData);
         } catch (error) {
             throw error;
         } finally {
@@ -45,7 +47,7 @@ export default function EditAtivoModalWrapper({ ativoToEdit, onClose }: EditAtiv
         }
     };
 
-    const isOpen = !!ativoToEdit;
+    const isOpen = !!assetToEdit;
 
     if (!isOpen) {
         return null;
@@ -74,7 +76,7 @@ export default function EditAtivoModalWrapper({ ativoToEdit, onClose }: EditAtiv
                     <Input
                         id="edit-codigo"
                         name="codigo"
-                        value={formData.codigo}
+                        value={formData.code}
                         onChange={handleChange}
                         disabled={isSubmitting}
                         className="bg-slate-800 border-2 border-slate-700 focus:border-purple-500 focus:ring-purple-500 text-white placeholder-slate-500 uppercase"
@@ -82,13 +84,13 @@ export default function EditAtivoModalWrapper({ ativoToEdit, onClose }: EditAtiv
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="edit-tipo" className="text-sm font-semibold text-purple-300 tracking-wide">
+                    <Label htmlFor="edit-type" className="text-sm font-semibold text-purple-300 tracking-wide">
                         TIPO
                     </Label>
                     <select
                         id="edit-tipo"
-                        name="tipo"
-                        value={formData.tipo}
+                        name="type"
+                        value={formData.type}
                         onChange={handleChange}
                         disabled={isSubmitting}
                         className="block w-full bg-slate-800 border-2 border-slate-700 focus:border-purple-500 focus:ring-purple-500 text-white rounded-md shadow-sm p-2.5"

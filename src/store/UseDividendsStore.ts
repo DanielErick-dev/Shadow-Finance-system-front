@@ -1,15 +1,15 @@
 import api from "@base/lib/api";
 import { create } from 'zustand';
-import type { DividendoMes, ItemDividendo } from '@base/types/dividends'
+import type { DividendMonth, ItemDividend } from '@base/types/dividends'
 import toast from "react-hot-toast";
 
 type newCardData = {
-    mes: number;
-    ano: number;
+    month: number;
+    year: number;
 }
 type DividendFilters = {
-    ano?: number | string;
-    mes?: number | string;
+    year?: number | string;
+    month?: number | string;
 }
 type PaginatedResponse<T> = {
     count: number;
@@ -18,19 +18,19 @@ type PaginatedResponse<T> = {
     results: T[];
 }
 export type DividendsState = {
-    cards: DividendoMes[];
+    cards: DividendMonth[];
     count: number;
     loading: boolean;
     error: string | null;
     fetchDividends: (filters?: DividendFilters, page?: number) => Promise<void>;
-    addDividend: (cardId: number, newItemData: Omit<ItemDividendo, 'id'>) => Promise<void>;
-    updateDividend: (itemId: number, updatedItemData: Omit<ItemDividendo, 'id'>) => Promise<void>;
+    addDividend: (cardId: number, newItemData: Omit<ItemDividend, 'id'>) => Promise<void>;
+    updateDividend: (itemId: number, updatedItemData: Omit<ItemDividend, 'id'>) => Promise<void>;
     deleteDividend: (itemId: number) => Promise<void>;
     addMonthCard: (data: newCardData) => Promise<void>;
     deleteCard: (cardId: number) => Promise<void>;
 }
 
-export const useDividendStore = create<DividendsState>((set, get) => ({
+export const useDividendsStore = create<DividendsState>((set, get) => ({
     cards: [],
     count: 0,
     loading: false,
@@ -39,7 +39,7 @@ export const useDividendStore = create<DividendsState>((set, get) => ({
     fetchDividends: async (filters = {}, page = 1) => {
         set({ loading: true, error: null });
         try {
-            const response = await api.get<PaginatedResponse<DividendoMes>>('/cards-dividendos/', {
+            const response = await api.get<PaginatedResponse<DividendMonth>>('/cards-dividends/', {
                 params: { ...filters, page }
             });
 
@@ -49,7 +49,6 @@ export const useDividendStore = create<DividendsState>((set, get) => ({
                 loading: false 
             });
         } catch (error) {
-            console.error('Falha ao carregar os cards de dividendos: ', error);
             const errorMessage = 'Não foi possível carregar os dados dos dividendos.';
             set({ error: errorMessage, loading: false });
             toast.error(errorMessage);
@@ -57,12 +56,12 @@ export const useDividendStore = create<DividendsState>((set, get) => ({
     },
     addDividend: async (cardId, newItemData) => {
         const dataParaApi = {
-            valor: newItemData.valor,
-            data: newItemData.data,
-            ativo_id: newItemData.ativo.id,
-            card_mes: cardId
+            value: newItemData.value,
+            received_date: newItemData.received_date,
+            asset_id: newItemData.asset.id,
+            card_month: cardId
         };
-        const promise = api.post('/itens-dividendos/', dataParaApi);
+        const promise = api.post('/itens-dividends/', dataParaApi);
         await toast.promise(promise, {
             loading: 'Adicionando dividendo...',
             success: 'Dividendo adicionado com sucesso!',
@@ -73,11 +72,11 @@ export const useDividendStore = create<DividendsState>((set, get) => ({
 
     updateDividend: async (itemId, updatedItemData) => {
         const dataParaApi = {
-            valor: updatedItemData.valor,
-            data_recebimento: updatedItemData.data,
-            ativo_id: updatedItemData.ativo.id,
+            value: updatedItemData.value,
+            received_date: updatedItemData.received_date,
+            asset_id: updatedItemData.asset.id,
         };
-        const promise = api.patch(`/itens-dividendos/${itemId}/`, dataParaApi);
+        const promise = api.patch(`/itens-dividends/${itemId}/`, dataParaApi);
         await toast.promise(promise, {
             loading: 'Atualizando registro...',
             success: 'Dividendo atualizado com sucesso!',
@@ -87,7 +86,7 @@ export const useDividendStore = create<DividendsState>((set, get) => ({
     },
 
     deleteDividend: async (itemId) => {
-        const promise = api.delete(`/itens-dividendos/${itemId}/`);
+        const promise = api.delete(`/itens-dividends/${itemId}/`);
         await toast.promise(promise, {
             loading: 'Excluindo dividendo...',
             success: 'Dividendo excluído com sucesso.',
@@ -104,14 +103,14 @@ export const useDividendStore = create<DividendsState>((set, get) => ({
     },
 
     addMonthCard: async (data) => {
-        const { mes, ano } = data;
+        const { month, year } = data;
         const { cards } = get();
-        const mesExiste = cards.some(card => card.mes === mes && card.ano === ano);
+        const mesExiste = cards.some(card => card.month === month && card.year === year);
         if (mesExiste) {
             toast.error('Este mês já está registrado.');
             throw new Error('Mês já registrado');
         }
-        const promise = api.post('/cards-dividendos/', { mes, ano });
+        const promise = api.post('/cards-dividends/', { month, year });
         await toast.promise(promise, {
             loading: 'Criando registro do mês...',
             success: 'Novo mês de referência criado!',
@@ -121,7 +120,7 @@ export const useDividendStore = create<DividendsState>((set, get) => ({
     },
 
     deleteCard: async (cardId) => {
-        const promise = api.delete(`/cards-dividendos/${cardId}/`);
+        const promise = api.delete(`/cards-dividends/${cardId}/`);
         await toast.promise(promise, {
             loading: 'Excluindo mês e todos os registros...',
             success: 'Mês excluído com sucesso.',

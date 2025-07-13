@@ -28,7 +28,7 @@ const painelItems = [
     title: "GESTÃO DE ATIVOS",
     description: "Cadastre e organize todos os ativos que compõem sua carteira de investimentos.",
     icon: <Wallet className="h-8 w-8 text-green-400" />,
-    path: "/ativos" 
+    path: "/assets" 
   },
   {
     title: "CONTROLE DE DESPESAS",

@@ -1,28 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { Ativo, ItemDividendo } from '@base/types/dividends';
-import AddAtivoModalWrapper from '@base/components/ativos/AddAtivoModalWrapper';
+import { type Asset } from '@base/types/assets'
+import { type ItemDividend } from '@base/types/dividends';
+import AddAssetModalWrapper from '@base/components/ativos/AddAssetModalWrapper';
 import toast from 'react-hot-toast';
 
-
-type FormState = {
-    ativoCodigo: string;
-    valor: string; 
-    data: string;
-}
-
 export type DividendFormData = {
-    ativoCodigo: string;
-    valor: number;
-    data: string;
+    assetCode: string;
+    value: string;
+    received_date: string;
 }
 
 type Props = {
     onSave: (formData: DividendFormData) => Promise<void>;
     onCancel: () => void;
-    ativosDisponiveis: Ativo[];
-    initialData?: Omit<ItemDividendo, 'id'>;
+    ativosDisponiveis: Asset[];
+    initialData?: Omit<ItemDividend, 'id'>;
     submitButtonText?: string;
 }
 
@@ -33,22 +27,22 @@ export function AddDividendForm({
     initialData, 
     submitButtonText = 'Adicionar' 
 }: Props) {
-    const getInitialFormState = (): FormState => {
+    const getInitialFormState = (): DividendFormData => {
         if (initialData) {
             return {
-                ativoCodigo: initialData.ativo.codigo,
-                valor: String(initialData.valor),
-                data: initialData.data
+                assetCode: initialData.asset.code,
+                value: String(initialData.value),
+                received_date: initialData.received_date
             };
         }
         return {
-            ativoCodigo: ativosDisponiveis.length > 0 ? ativosDisponiveis[0].codigo : '',
-            valor: '',
-            data: new Date().toISOString().split('T')[0]
+            assetCode: ativosDisponiveis.length > 0 ? ativosDisponiveis[0].code : '',
+            value: '',
+            received_date: new Date().toISOString().split('T')[0]
         }
     }
 
-    const [form, setForm] = useState<FormState>(getInitialFormState());
+    const [form, setForm] = useState<DividendFormData>(getInitialFormState());
     const [isSubmitting, setIsSubmitting] = useState(false);
       
     useEffect(() => {
@@ -66,11 +60,11 @@ export function AddDividendForm({
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         
-        if (!form.ativoCodigo) {
+        if (!form.assetCode) {
             toast.error('Por favor, selecione um ativo válido.');
             return;
         }
-        if (form.valor === '' || Number(form.valor) <= 0) {
+        if (form.value === '' || Number(form.value) <= 0) {
             toast.error('Por favor, insira um valor positivo para o dividendo.');
             return;
         }
@@ -78,9 +72,9 @@ export function AddDividendForm({
         setIsSubmitting(true);
         try {
             const formDataToSave: DividendFormData = {
-                ativoCodigo: form.ativoCodigo,
-                valor: Number(form.valor),
-                data: form.data,
+                assetCode: form.assetCode,
+                value: form.value,
+                received_date: form.received_date,
             };
             await onSave(formDataToSave);
             onCancel(); 
@@ -97,31 +91,36 @@ export function AddDividendForm({
                 <label htmlFor='ativoCodigo' className='block text-sm font-medium text-purple-300'>
                     Ativo
                 </label>
-                <AddAtivoModalWrapper />
+                <AddAssetModalWrapper />
             </div>
             <select
-                id='ativoCodigo'
-                name='ativoCodigo'
-                value={form.ativoCodigo}
+                id='assetCode'
+                name='assetCode'
+                value={form.assetCode}
                 onChange={handleInputChange}
                 className='w-full p-2.5 bg-slate-900 border border-slate-600 rounded-md shadow-sm text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500'
                 required
                 disabled={isSubmitting}
             >
                 <option value="" disabled>Selecione um ativo</option>
-                {ativosDisponiveis.map((ativo) => (
-                    <option key={ativo.id} value={ativo.codigo}>{ativo.codigo.toUpperCase()} - ({ativo.tipo})</option>
+                {ativosDisponiveis.map((asset) => (
+                    <option 
+                        key={asset.id} 
+                        value={asset.code}
+                    >
+                        {asset.code.toUpperCase()} - ({asset.type})
+                    </option>
                 ))}
             </select>
             
             <div>
-                 <label htmlFor='valor' className='block text-sm font-medium text-purple-300 mb-1'>Valor (R$)</label>
+                 <label htmlFor='value' className='block text-sm font-medium text-purple-300 mb-1'>Valor (R$)</label>
                  <input 
-                    id="valor"
-                    name="valor"
+                    id="value"
+                    name="value"
                     type="number"
                     step="0.01"
-                    value={form.valor}
+                    value={form.value}
                     onChange={handleInputChange}
                     className='w-full p-2.5 bg-slate-900 border border-slate-600 rounded-md shadow-sm text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500'
                     placeholder='120.50'
@@ -131,12 +130,12 @@ export function AddDividendForm({
             </div>
             
             <div>
-                 <label htmlFor='data' className='block text-sm font-medium text-purple-300 mb-1'>Data</label>
+                 <label htmlFor='received_date' className='block text-sm font-medium text-purple-300 mb-1'>Data</label>
                  <input 
-                    id="data"
-                    name="data"
+                    id="received_date"
+                    name="received_date"
                     type="date"
-                    value={form.data}
+                    value={form.received_date}
                     onChange={handleInputChange}
                     className='w-full p-2.5 bg-slate-900 border border-slate-600 rounded-md shadow-sm text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500'
                     required

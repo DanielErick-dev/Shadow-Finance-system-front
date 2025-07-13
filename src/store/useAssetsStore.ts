@@ -1,32 +1,27 @@
-import type { Ativo } from '@base/types/dividends'
+import type { Asset } from '@base/types/assets'
 import { create } from 'zustand'
 import api from '@base/lib/api'
 import toast from 'react-hot-toast'
 
-export type NewAtivoData = {
-    codigo: string;
-    tipo: string;
-}
-
-export type AtivosState = {
-    ativos: Ativo[];
+export type AssetsState = {
+    assets: Asset[];
     loading: boolean;
     error: null | string;
-    fetchAtivos: () => Promise <void>;
-    addAtivo: (data: NewAtivoData) => Promise<void>;
-    updateAtivo: (id: number, data: NewAtivoData) => Promise<void>; 
-    deleteAtivo: (id: number) => Promise<void>;
+    fetchAssets: () => Promise <void>;
+    addAsset: (data: Omit<Asset, 'id'>) => Promise<void>;
+    updateAsset: (id: number, data: Omit<Asset, 'id'>) => Promise<void>; 
+    deleteAsset: (id: number) => Promise<void>;
 }
 
-export const useAtivosStore = create<AtivosState>((set, get) => ({
-    ativos: [],
+export const useAssetsStore = create<AssetsState>((set, get) => ({
+    assets: [],
     loading: false,
     error: null,
-    fetchAtivos: async () => {
+    fetchAssets: async () => {
         set({ loading: true, error: null})
         try {
-            const response = await api.get('/ativos/')
-            set({ ativos: response.data, loading: false})
+            const response = await api.get('/assets/')
+            set({ assets: response.data, loading: false})
         } catch (error) {
             const errorMessage = 'Não foi possível carregar a lista de ativos.';
             console.error('Ocorreu um erro ao buscar ativos:', error)
@@ -35,8 +30,8 @@ export const useAtivosStore = create<AtivosState>((set, get) => ({
         }
     },
 
-    addAtivo: async (data) => {
-        const promise = api.post('/ativos/', data);
+    addAsset: async (data) => {
+        const promise = api.post('/assets/', data);
 
         await toast.promise(promise, {
             loading: 'Registrando novo ativo...',
@@ -45,11 +40,11 @@ export const useAtivosStore = create<AtivosState>((set, get) => ({
         });
 
         
-        await get().fetchAtivos();
+        await get().fetchAssets();
     },
 
-    updateAtivo: async (id, data) => {
-        const promise = api.patch(`/ativos/${id}/`, data);
+    updateAsset: async (id, data) => {
+        const promise = api.patch(`/assets/${id}/`, data);
 
         await toast.promise(promise, {
             loading: 'Salvando alterações...',
@@ -57,11 +52,11 @@ export const useAtivosStore = create<AtivosState>((set, get) => ({
             error: 'Não foi possível salvar as alterações. Verifique informações duplicadas',
         });
 
-        await get().fetchAtivos();
+        await get().fetchAssets();
     },
 
-    deleteAtivo: async (id) => {
-        const promise = api.delete(`/ativos/${id}/`);
+    deleteAsset: async (id) => {
+        const promise = api.delete(`/assets/${id}/`);
 
         await toast.promise(promise, {
             loading: 'Excluindo ativo...',
@@ -70,7 +65,7 @@ export const useAtivosStore = create<AtivosState>((set, get) => ({
         });
 
         set(state => ({
-            ativos: state.ativos.filter(ativo => ativo.id !== id)
+            assets: state.assets.filter(asset => asset.id !== id)
         }));
     }
 }));

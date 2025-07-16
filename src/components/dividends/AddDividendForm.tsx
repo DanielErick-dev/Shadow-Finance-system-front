@@ -15,17 +15,17 @@ export type DividendFormData = {
 type Props = {
     onSave: (formData: DividendFormData) => Promise<void>;
     onCancel: () => void;
-    ativosDisponiveis: Asset[];
     initialData?: Omit<ItemDividend, 'id'>;
     submitButtonText?: string;
+    availableAssets: Asset[]
 }
 
 export function AddDividendForm({
     onSave,
     onCancel, 
-    ativosDisponiveis,
     initialData, 
-    submitButtonText = 'Adicionar' 
+    submitButtonText = 'Adicionar',
+    availableAssets
 }: Props) {
     const getInitialFormState = (): DividendFormData => {
         if (initialData) {
@@ -36,7 +36,7 @@ export function AddDividendForm({
             };
         }
         return {
-            assetCode: ativosDisponiveis.length > 0 ? ativosDisponiveis[0].code : '',
+            assetCode: availableAssets.length > 0 ? availableAssets[0].code : '',
             value: '',
             received_date: new Date().toISOString().split('T')[0]
         }
@@ -47,7 +47,7 @@ export function AddDividendForm({
       
     useEffect(() => {
         setForm(getInitialFormState());
-    }, [initialData, ativosDisponiveis]);
+    }, [initialData, availableAssets]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -103,7 +103,7 @@ export function AddDividendForm({
                 disabled={isSubmitting}
             >
                 <option value="" disabled>Selecione um ativo</option>
-                {ativosDisponiveis.map((asset) => (
+                {availableAssets.map((asset) => (
                     <option 
                         key={asset.id} 
                         value={asset.code}

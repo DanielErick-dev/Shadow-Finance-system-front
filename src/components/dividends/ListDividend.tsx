@@ -15,17 +15,17 @@ import { useConfirmation } from '@base/contexts/ConfirmationDialogContext'
 type Props = {
     data: DividendMonth
     onAddDividend: (cardId: number, item: Omit<ItemDividend, 'id'>) => Promise <void>
-    ativosDisponiveis: Asset[]
     onUpdateDividend: (itemId: number, itemData: Omit<ItemDividend, 'id'>) => Promise<void>
     onDeleteDividend: (itemId: number) => Promise<void>
+    availableAssets: Asset[]
     onDeleteCard: (cardId: number) => Promise<void>
 }
 export function DividendCard({ 
     data, 
     onAddDividend, 
-    ativosDisponiveis,
     onUpdateDividend,
     onDeleteDividend,
+    availableAssets,
     onDeleteCard
 }: Props) {
     const nomeMes = new Date(data.year, data.month - 1).toLocaleString('pt-BR', { month: 'long' });
@@ -34,7 +34,7 @@ export function DividendCard({
     const { confirm } = useConfirmation()
     
     const handleSaveNewDividend = async (formData: DividendFormData) => {
-        const selectedAtivo = ativosDisponiveis.find(
+        const selectedAtivo = availableAssets.find(
             asset => asset.code === formData.assetCode
         );
         
@@ -52,7 +52,7 @@ export function DividendCard({
     const handleSaveEditedDividend = async (formData: DividendFormData) => {
         if (!editingItemId) return;
 
-        const selectedAtivo = ativosDisponiveis.find(
+        const selectedAtivo = availableAssets.find(
             asset => asset.code === formData.assetCode
         );
         if (!selectedAtivo) {
@@ -157,8 +157,8 @@ export function DividendCard({
                     <AddDividendForm
                     onSave={handleSaveNewDividend}
                     onCancel={() => setIsAdding(false)}
-                    ativosDisponiveis={ativosDisponiveis}
                     submitButtonText="Adicionar Dividendo"
+                    availableAssets={availableAssets}
                     />
                 )}
 
@@ -177,8 +177,8 @@ export function DividendCard({
                                 initialData={item}
                                 onSave={handleSaveEditedDividend}
                                 onCancel={handleCancelEdit}
-                                ativosDisponiveis={ativosDisponiveis}
                                 submitButtonText="Salvar Alterações"
+                                availableAssets={availableAssets}
                                 />
                             ) : (
                                 <li

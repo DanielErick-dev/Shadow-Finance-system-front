@@ -59,4 +59,4 @@ Este repositório contém o código do **Front-End**, desenvolvido com **Next.js
 
 - [ ] Desenvolvimento do **Dashboard** com gráficos e estatísticas.
 - [ ] Implementação do módulo de **Controle de Despesas**.
-- [ ] Criação da tela de **Evolução de Investimentos**.
+- [ ] terminar desenvolvimento da **Tela de Investimentos**

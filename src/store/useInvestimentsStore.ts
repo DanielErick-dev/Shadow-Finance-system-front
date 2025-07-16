@@ -1,6 +1,6 @@
 import api from '@base/lib/api'
 import { create } from 'zustand'
-import { ItemInvestiment, CardInvestimentMonth, NewInvestimentMonthData } from '@base/types/investiments'
+import { ItemInvestiment, CardInvestimentMonth, NewMonthCard } from '@base/types/investiments'
 import { toast } from 'react-hot-toast'
 
 type InvestimentsState = {
@@ -9,7 +9,7 @@ type InvestimentsState = {
     error: null | string;
     fetchInvestiments: () => Promise<void>;
     addInvestiments: (cardId: number, newInvestiment: Omit<ItemInvestiment, 'id'>) => Promise<void>;
-    addMonthCard: (data: NewInvestimentMonthData) => Promise<void>
+    addMonthCard: (data: NewMonthCard) => Promise<void>
 }
 
 export const useInvestimentStore = create<InvestimentsState>((set, get) => ({
@@ -19,7 +19,7 @@ export const useInvestimentStore = create<InvestimentsState>((set, get) => ({
     fetchInvestiments: async () => {
         set({ loading: true, error: null})
         try{
-            const response = await api.get('cards-investiments/')
+            const response = await api.get('/cards-investiments/')
             set({
                 cards: response.data,
                 loading: false
@@ -40,7 +40,7 @@ export const useInvestimentStore = create<InvestimentsState>((set, get) => ({
             card: cardId
 
         }
-        const promise = api.post('itens-investiments', dataParaApi)
+        const promise = api.post('/itens-investiments/', dataParaApi)
         await toast.promise(promise, {
             loading: 'Adicionando Investimento..',
             success: 'Investimento Adicionado com Sucesso',
@@ -56,7 +56,7 @@ export const useInvestimentStore = create<InvestimentsState>((set, get) => ({
             toast.error('este mês já está registrado');
             throw new Error('mês já registrado')
         }
-        const promise = api.post('cards-investiments/', {month, year})
+        const promise = api.post('/cards-investiments/', {month, year})
         await toast.promise(promise, {
             loading: 'criando registro de mês..',
             success: 'novo mês de referência adicionado',

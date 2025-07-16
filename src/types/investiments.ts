@@ -17,4 +17,9 @@ export type ItemInvestiment = {
     operation_date: string;
 }
 
+export type NewMonthCard = {
+    month: number;
+    year: number;
+}
+
 export type NewInvestimentMonthData = Omit<CardInvestimentMonth, 'id'>

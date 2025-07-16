@@ -13,7 +13,7 @@ type EditAssetModalWrapperProps = {
     onClose: () => void;
 };
 
-export default function EditAtivoModalWrapper({ assetToEdit, onClose }: EditAssetModalWrapperProps) {
+export default function EditAssetModalWrapper({ assetToEdit, onClose }: EditAssetModalWrapperProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<NewAssetData>({ code: '', type: 'ACAO' });
 

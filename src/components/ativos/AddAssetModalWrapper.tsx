@@ -8,7 +8,7 @@ import { Label } from '@base/components/ui/label'
 
 type NewAssetData = Omit<Asset, 'id'>
 
-export default function AddAtivoModalWrapper() {
+export default function AddAssetModalWrapper() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<NewAssetData>({
         code: '',

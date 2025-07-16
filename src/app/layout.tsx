@@ -4,6 +4,7 @@ import { AuthProvider } from "@base/contexts/AuthContext";
 import { ConfirmationDialogProvider } from "@base/contexts/ConfirmationDialogContext";
 import { Toaster } from "react-hot-toast";
 import PageTransition from "@base/components/layout/TransitionEffects";
+import PrivateRoute from "@base/components/layout/PrivateRoute";
 
 export const metadata: Metadata = {
   title: "Shadow Monarch Finance",
@@ -42,7 +43,9 @@ export default function RootLayout({
               }}
             />
             <PageTransition>
-              {children}
+              <PrivateRoute>
+                {children}
+              </PrivateRoute>
             </PageTransition>
           </ConfirmationDialogProvider>
         </AuthProvider>

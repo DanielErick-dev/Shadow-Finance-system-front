@@ -1,5 +1,4 @@
 "use client";
-
 import { useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
@@ -56,27 +55,27 @@ type PainelCardProps = {
 
 function PainelCard({ item, onClick }: PainelCardProps) {
     return (
-        <button
-            onClick={() => onClick(item.path)}
-            className="group relative w-full h-full text-left p-6 bg-slate-900 border-2 border-slate-800 rounded-xl 
-                       hover:border-purple-600/80 hover:-translate-y-1 transition-all duration-300 ease-in-out
-                       focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-950"
-        >
-            <div className="flex items-center gap-4">
-                <div className="p-2 bg-slate-800 border border-slate-700 rounded-lg">
-                    {item.icon}
+            <button
+                onClick={() => onClick(item.path)}
+                className="group relative w-full h-full text-left p-6 bg-slate-900 border-2 border-slate-800 rounded-xl 
+                hover:border-purple-600/80 hover:-translate-y-1 transition-all duration-300 ease-in-out
+                focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+            >
+                <div className="flex items-center gap-4">
+                    <div className="p-2 bg-slate-800 border border-slate-700 rounded-lg">
+                        {item.icon}
+                    </div>
+                    <h2 className="text-lg font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                        [ {item.title} ]
+                    </h2>
                 </div>
-                <h2 className="text-lg font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
-                    [ {item.title} ]
-                </h2>
-            </div>
-            <p className="mt-4 text-sm text-slate-400">
-                {item.description}
-            </p>
-            <div className="absolute bottom-4 right-4 text-slate-600 group-hover:text-purple-400 transition-colors duration-300">
-                <ChevronRight className="h-6 w-6" />
-            </div>
-        </button>
+                <p className="mt-4 text-sm text-slate-400">
+                    {item.description}
+                </p>
+                <div className="absolute bottom-4 right-4 text-slate-600 group-hover:text-purple-400 transition-colors duration-300">
+                    <ChevronRight className="h-6 w-6" />
+                </div>
+            </button>
     );
 }
 

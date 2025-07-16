@@ -1,22 +1,15 @@
 "use client"
 import { useState } from "react";
 import { type Asset } from "@base/types/assets";
-import { 
-    ItemInvestiment, 
-    NewInvestimentMonthData, 
-    CardInvestimentMonth 
-} from "@base/types/investiments";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@base/components/ui/tooltip"
+import { AddInvestimentForm, InvestimentFormData }from "@base/components/investiments/AddInvestimentForm";
+import { ItemInvestiment, CardInvestimentMonth, } from "@base/types/investiments";
 import { toast } from "react-hot-toast";
 import { Pencil, Trash } from "lucide-react";
 
 type Props = {
     data: CardInvestimentMonth
+    onAddInvestiment: (cardId: number, item: Omit<ItemInvestiment, 'id'>) => Promise<void>;
+    availableAssets: Asset[];
 }
 
 function InvestimentItemRow({ item }: { item: ItemInvestiment }){
@@ -74,7 +67,7 @@ function InvestimentItemRow({ item }: { item: ItemInvestiment }){
                     <p className="text-xs text-slate-400">Custo Total</p>
                     <p 
                         className={`text-xl font-bold font-mono
-                        ${isBuyOrder ? 'text-red-400': 'text-green-400'}`}
+                        ${isBuyOrder ? 'text-red-200': 'text-green-200'}`}
                     >
                         R$ {totalValue.toFixed(2)}
                     </p>
@@ -83,7 +76,31 @@ function InvestimentItemRow({ item }: { item: ItemInvestiment }){
         </li>
     )
 }
-export function InvestimentCard({ data }: Props) {
+export function InvestimentCard(
+    {
+        data,
+        onAddInvestiment,
+        availableAssets
+    } : Props
+) {
+    const [isAdding, setIsAdding] = useState(false);
+    const handleSaveNewInvestiment = async (formData: InvestimentFormData) => {
+        const selectedAsset = availableAssets.find(
+            asset => asset.code === formData.assetCode
+        )
+        if (!selectedAsset){
+            toast.error('Ativo selecionado é inválido, tente novamente')
+            throw new Error('ativo inválido')
+        }
+        const NewItemData: Omit<ItemInvestiment, 'id'> = {
+            asset: selectedAsset,
+            order_type: formData.order_type,
+            quantity: formData.quantity,
+            unit_price: formData.unit_price,
+            operation_date: formData.operation_date
+        }
+        await onAddInvestiment(data.id, NewItemData);
+    }
     const nameMonth = new Date(data.year, data.month - 1).toLocaleString('pt-BR', { month: 'long'})
     const totalInvested = data.itens
         .filter(item => item.order_type === 'BUY')
@@ -104,44 +121,45 @@ export function InvestimentCard({ data }: Props) {
                 </h3>
                 <div className="flex items-center gap-4">
                     {totalInvested > 0 && (
-                        <p className="text-sm font-semibold text-red-400 px-3 py-1 bg-red-900/30
-                        border border-red-500/30 rounded-full">
+                        <p className="text-sm font-bold text-slate-100 rounded-full">
                             Total Aportado: R$ {totalInvested.toFixed(2)}
                         </p>
                     )}
-                    <button className="bg-blue-600 hover:bg-blue-800 text-white font-semibold
-                    text-xs py-2 px-3 rounded-md transition-colors duration-200">
+                    <button
+                        onClick={() => { setIsAdding(true)}}
+                        className="bg-blue-600 hover:bg-blue-800 text-white font-semibold
+                        text-xs py-2 px-3 rounded-md transition-colors duration-200"
+                    >
                         + Investimento
                     </button>
                 </div>
             </div>
             <div className="p-5">
-                {data.itens.length > 0 ? (
+                {isAdding && (
+                    <AddInvestimentForm
+                        onSave={handleSaveNewInvestiment}
+                        onCancel={() => setIsAdding(false)}
+                        submitButtonText="Adicionar Investimento"
+                        availableAssets={availableAssets}
+                    />
+                )}
+                {!isAdding && data.itens.length === 0 && (
+                    <p className="text-slate-500 italic text-center py-6">
+                        Nenhum Registro de Investimento associado
+                    </p>
+                )}
+                {!isAdding && data.itens.length > 0 && (
                     <ul className="space-y-4">
                         {data.itens.map((item) => (
                             <InvestimentItemRow key={item.id} item={item} />
                         ))}
                     </ul>
-                ): (
-                    <p className="text-slate-500 italic text-center py-6">
-                        Nenhuma operação de investimento registrada para este período
-                    </p>
                 )}
+                    
             </div>
         </div>
         
     )
 }
 
-{/* {data.itens.map((item) => {
-            return(
-                <div>
-                    <p>ativo da operação: {item.asset.code} - {item.asset.type}</p>
-                    <p key={item.id}>preço unitário: {item.unit_price}</p>
-                    <p>cotas compradas: {item.quantity}</p>
-                    <p>tipo de ordem: {item.order_type}</p>
-                    <p>data da operação: {item.operation_date}</p>
-                </div>
-            )
-        })} */}
         

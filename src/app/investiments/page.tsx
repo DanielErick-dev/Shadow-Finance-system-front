@@ -22,12 +22,26 @@ export default function Investiments(){
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
   });
+  const [filters, setFilters] = useState({
+    year: '',
+    month: '',
+  })
 
   useEffect(() => {
-    fetchInvestiments();
+    fetchInvestiments(filters);
     fetchAssets();
-  }, [fetchInvestiments, fetchAssets]);
+  }, [fetchInvestiments, fetchAssets, filters]);
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+    const { name, value} = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+  const clearFilters = () => {
+    setFilters({ year: '', month: ''});
+  }
   const handleAddMonthSubmit = async () => {
     setIsSubmittingMonth(true);
     try{
@@ -45,8 +59,8 @@ export default function Investiments(){
       [name]: Number(value)
     }));
   }
-  const anosDisponiveis = [2023, 2024, 2025]
-  const mesesDoAno = Array.from({ length: 12 }, (_, i) => ({
+  const availableYears = [2023, 2024, 2025]
+  const monthsOfYear = Array.from({ length: 12 }, (_, i) => ({
     value: i + 1,
     name: new Date(0, i).toLocaleString('pt-BR', { month: 'long' })
   }))
@@ -118,7 +132,7 @@ export default function Investiments(){
                   focus:border-purple-500 focus:ring-purple-500 rounded-md"
                 
                 >
-                  {mesesDoAno.map((month) => (
+                  {monthsOfYear.map((month) => (
                     <option key={month.value} value={month.value}>
                       {month.name.charAt(0).toUpperCase() + month.name.slice(1)}
                     </option>
@@ -147,6 +161,48 @@ export default function Investiments(){
             </div>
           </GenericFormModal>
         </header>
+        <div className="p-4 mb-8 bg-slate-800/50 border border-slate-700 rounded-lg
+        flex flex-col gap-4 md:flex-row md:items-center">
+          <h3 className="text-sm font-semibold text-slate-300 whitespace-nowrap">FILTRAR POR:</h3>
+          <div className="w-full md:w-auto">
+            <select
+              name="year"
+              value={filters.year}
+              onChange={handleFilterChange}
+              className="w-full bg-slate-900 border border-slate-600 rounded-md p-2 text-white
+              focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+            >
+              <option value="">Todos os Anos</option>
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+          <div className="w-full md:w-auto">
+            <select
+              name="month"
+              value={filters.month}
+              onChange={handleFilterChange}
+              className="w-full bg-slate-900 border border-slate-600 rounded-md
+              p-2 text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+            >
+              <option value="">Todos os Meses</option>
+              {monthsOfYear.map(month => (
+                <option key={month.value} value={month.value}>
+                  {month.name.charAt(0).toUpperCase() + month.name.slice(1)}
+                </option>
+              ))}
+              <option value=""></option>
+            </select>
+          </div>
+          <button
+            onClick={clearFilters}
+            className="w-full md:w-auto md:ml-auto bg-slate-700 hover:bg-slate-600 text-slate-300
+            text-sm font-semibold py-2 px-4 rounded-md transition-colors cursor-pointer"
+          >
+            Limpar Filtros
+          </button>
+        </div>
         {cards.length === 0 && (
           <div className="text-center py-16 bg-slate-900 border rounded-xl border-dashed border-slate-700">
             <svg 

@@ -3,11 +3,16 @@ import { create } from 'zustand'
 import { ItemInvestiment, CardInvestimentMonth, NewMonthCard } from '@base/types/investiments'
 import { toast } from 'react-hot-toast'
 
+type DividendFilters = {
+    year?: number | string;
+    month?: number | string;
+}
+
 type InvestimentsState = {
     cards: CardInvestimentMonth[]
     loading: boolean;
     error: null | string;
-    fetchInvestiments: () => Promise<void>;
+    fetchInvestiments: (filters?: DividendFilters) => Promise<void>;
     addInvestiments: (cardId: number, newInvestiment: Omit<ItemInvestiment, 'id'>) => Promise<void>;
     addMonthCard: (data: NewMonthCard) => Promise<void>
 }
@@ -16,10 +21,12 @@ export const useInvestimentStore = create<InvestimentsState>((set, get) => ({
     cards: [],
     loading: false,
     error: null,
-    fetchInvestiments: async () => {
+    fetchInvestiments: async (filters = {}) => {
         set({ loading: true, error: null})
         try{
-            const response = await api.get('/cards-investiments/')
+            const response = await api.get('/cards-investiments/', {
+                params: { ...filters }
+            })
             set({
                 cards: response.data,
                 loading: false

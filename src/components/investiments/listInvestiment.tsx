@@ -9,14 +9,22 @@ import { Pencil, Trash } from "lucide-react";
 type Props = {
     data: CardInvestimentMonth
     onAddInvestiment: (cardId: number, item: Omit<ItemInvestiment, 'id'>) => Promise<void>;
+    onUpdateInvestiment: (itemId: number, itemData: Omit<ItemInvestiment, 'id'>) => Promise<void>;
     availableAssets: Asset[];
 }
 
-function InvestimentItemRow({ item }: { item: ItemInvestiment }){
+type InvestimentItemRowProps = {
+    item: ItemInvestiment;
+    onEditClick: (itemId: number) => void;
+}
+
+function InvestimentItemRow({ item, onEditClick} : InvestimentItemRowProps ){
     const totalValue = Number(item.quantity) * Number(item.unit_price)
     const isBuyOrder = 'COMPRA';
     return (
-        <li className="bg-slate-800/60 rounded-lg border border-slate-700 p-4 space-y-4">
+        <li 
+            key={item.id}
+            className="bg-slate-800/60 rounded-lg border border-slate-700 p-4 space-y-4">
             <div className="flex justify-between items-start">
                 <div >
                     <span
@@ -34,7 +42,10 @@ function InvestimentItemRow({ item }: { item: ItemInvestiment }){
                     </h4>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <button className="p-2 rounded-full hover:bg-slate-700 group">
+                    <button
+                        onClick={() => onEditClick(item.id)}
+                        className="p-2 rounded-full hover:bg-slate-700 group"
+                    >
                         <Pencil className="w-5 h-5 text-slate-400 group-hover:text-blue-400 cursor-pointer"/>
                     </button>
                     <button className="p-2 rounded-full hover:bg-slate-700 group">
@@ -80,10 +91,12 @@ export function InvestimentCard(
     {
         data,
         onAddInvestiment,
+        onUpdateInvestiment,
         availableAssets
     } : Props
 ) {
     const [isAdding, setIsAdding] = useState(false);
+    const [editingItemId, setIsEditingItemId] = useState<number | null>(null)
     const handleSaveNewInvestiment = async (formData: InvestimentFormData) => {
         const selectedAsset = availableAssets.find(
             asset => asset.code === formData.assetCode
@@ -100,6 +113,29 @@ export function InvestimentCard(
             operation_date: formData.operation_date
         }
         await onAddInvestiment(data.id, NewItemData);
+    }
+    const handleSaveEditedInvestiment = async (formData: InvestimentFormData) => {
+        if(!editingItemId) return;
+        const selectedAsset = availableAssets.find(
+            asset => asset.code === formData.assetCode
+        );
+
+        if(!selectedAsset){
+            toast.error('Ativo selecionado é inválido, tente novamente');
+            throw new Error('ativo inválido');
+        }
+        const updatedItemData: Omit<ItemInvestiment, 'id'> = {
+            asset: selectedAsset,
+            order_type: formData.order_type,
+            quantity: formData.quantity,
+            unit_price: formData.unit_price,
+            operation_date: formData.operation_date
+        }
+        await onUpdateInvestiment(editingItemId, updatedItemData);
+        
+    }
+    const handleCancelEdit = () => {
+        setIsEditingItemId(null);
     }
     const nameMonth = new Date(data.year, data.month - 1).toLocaleString('pt-BR', { month: 'long'})
     const totalInvested = data.itens
@@ -151,7 +187,22 @@ export function InvestimentCard(
                 {!isAdding && data.itens.length > 0 && (
                     <ul className="space-y-4">
                         {data.itens.map((item) => (
-                            <InvestimentItemRow key={item.id} item={item} />
+                            editingItemId === item.id ? (
+                                <AddInvestimentForm 
+                                    key={`edit-${item.id}`}
+                                    initialData={item}
+                                    onSave={handleSaveEditedInvestiment}
+                                    onCancel={handleCancelEdit}
+                                    submitButtonText="Salvar Alterações"
+                                    availableAssets={availableAssets}
+                                />
+                            ) : (
+                                <InvestimentItemRow 
+                                    key={item.id}
+                                    item={item}
+                                    onEditClick={setIsEditingItemId}
+                                />
+                            )
                         ))}
                     </ul>
                 )}

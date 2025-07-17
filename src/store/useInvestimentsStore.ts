@@ -13,6 +13,7 @@ type InvestimentsState = {
     loading: boolean;
     error: null | string;
     fetchInvestiments: (filters?: DividendFilters) => Promise<void>;
+    updateInvestiments: (itemId: number, updatedItemData: Omit<ItemInvestiment, 'id'>) => Promise<void>;
     addInvestiments: (cardId: number, newInvestiment: Omit<ItemInvestiment, 'id'>) => Promise<void>;
     addMonthCard: (data: NewMonthCard) => Promise<void>
 }
@@ -52,6 +53,22 @@ export const useInvestimentStore = create<InvestimentsState>((set, get) => ({
             loading: 'Adicionando Investimento..',
             success: 'Investimento Adicionado com Sucesso',
             error: 'Falha ao Adicionar Investimento'
+        });
+        await get().fetchInvestiments();
+    },
+    updateInvestiments: async (itemId, updatedItemData) => {
+        const dataToApi = {
+            asset_id: updatedItemData.asset.id,
+            order_type: updatedItemData.order_type,
+            quantity: updatedItemData.quantity,
+            unit_price: updatedItemData.unit_price,
+            operation_date: updatedItemData.operation_date, 
+        }
+        const promise = api.patch(`/itens-investiments/${itemId}/`, dataToApi);
+        await toast.promise(promise, {
+            loading: 'Atualizando Registro...',
+            success: 'Investimento Atualizado com Sucesso',
+            error: 'Falha ao Atualizar Registro'
         });
         await get().fetchInvestiments();
     },

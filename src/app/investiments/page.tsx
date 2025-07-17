@@ -13,6 +13,7 @@ export default function Investiments(){
     loading: investimentLoading,
     error: investimentError,
     fetchInvestiments,
+    updateInvestiments,
     addMonthCard,
     addInvestiments } = useInvestimentStore();
   
@@ -225,6 +226,7 @@ export default function Investiments(){
               key={card.id}
               data={card}
               onAddInvestiment={addInvestiments}
+              onUpdateInvestiment={updateInvestiments}
               availableAssets={assets}
             />
           ))}

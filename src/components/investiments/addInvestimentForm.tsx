@@ -18,6 +18,7 @@ export type InvestimentFormData = {
 type Props = {
     onSave: (formData: InvestimentFormData) => Promise<void>;
     onCancel: () => void;
+    
     submitButtonText?: string;
     availableAssets: Asset[]
     initialData?: Omit<ItemInvestiment, 'id'>; 

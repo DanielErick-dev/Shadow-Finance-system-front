@@ -5,20 +5,30 @@ import { AddInvestimentForm, InvestimentFormData }from "@base/components/investi
 import { ItemInvestiment, CardInvestimentMonth, } from "@base/types/investiments";
 import { toast } from "react-hot-toast";
 import { Pencil, Trash } from "lucide-react";
+import { useConfirmation } from "@base/contexts/ConfirmationDialogContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@base/components/ui/tooltip"
 
 type Props = {
     data: CardInvestimentMonth
     onAddInvestiment: (cardId: number, item: Omit<ItemInvestiment, 'id'>) => Promise<void>;
     onUpdateInvestiment: (itemId: number, itemData: Omit<ItemInvestiment, 'id'>) => Promise<void>;
+    onDeleteInvestiment: (itemId: number) => Promise<void>;
+    onDeleteMonthCard: (cardId: number) => Promise<void>;
     availableAssets: Asset[];
 }
 
 type InvestimentItemRowProps = {
     item: ItemInvestiment;
     onEditClick: (itemId: number) => void;
+    onDeleteClick: (itemId: ItemInvestiment) => void;
 }
 
-function InvestimentItemRow({ item, onEditClick} : InvestimentItemRowProps ){
+function InvestimentItemRow({ item, onEditClick, onDeleteClick} : InvestimentItemRowProps ){
     const totalValue = Number(item.quantity) * Number(item.unit_price)
     const isBuyOrder = 'COMPRA';
     return (
@@ -48,7 +58,10 @@ function InvestimentItemRow({ item, onEditClick} : InvestimentItemRowProps ){
                     >
                         <Pencil className="w-5 h-5 text-slate-400 group-hover:text-blue-400 cursor-pointer"/>
                     </button>
-                    <button className="p-2 rounded-full hover:bg-slate-700 group">
+                    <button 
+                        onClick={() => onDeleteClick(item)}
+                        className="p-2 rounded-full hover:bg-slate-700 group"
+                    >
                         <Trash className="w-5 h-5 text-slate-400 group-hover:text-red-500 cursor-pointer"/>
                     </button>
                 </div>
@@ -92,11 +105,15 @@ export function InvestimentCard(
         data,
         onAddInvestiment,
         onUpdateInvestiment,
-        availableAssets
+        onDeleteInvestiment,
+        onDeleteMonthCard,
+        availableAssets,
     } : Props
 ) {
     const [isAdding, setIsAdding] = useState(false);
     const [editingItemId, setIsEditingItemId] = useState<number | null>(null)
+    const { confirm } = useConfirmation();
+
     const handleSaveNewInvestiment = async (formData: InvestimentFormData) => {
         const selectedAsset = availableAssets.find(
             asset => asset.code === formData.assetCode
@@ -137,6 +154,37 @@ export function InvestimentCard(
     const handleCancelEdit = () => {
         setIsEditingItemId(null);
     }
+
+    const handleDeleteClick = async (item: ItemInvestiment) => {
+        const isConfirmed = await confirm({
+            title: '[ CONFIRMA EXCLUSÃO ]',
+            description: 'você realmente deseja excluir o registro de investimento?',
+            confirmText: 'Sim, Excluir',
+            cancelText: 'Não, Manter'
+        });
+        if(isConfirmed){
+            try{
+                await onDeleteInvestiment(item.id);
+            } catch (error){
+                throw new Error('erro ao apagar registro de investimento')
+            }
+        }
+    };
+    const handleDeleteMonthCard = async (card: CardInvestimentMonth) => {
+        const isConfirmed = await confirm({
+            title: '[ CONFIRMA EXCLUSÃO ]',
+            description: `você realmente deseja excluir o mês de: ${card.month}/${card.year}`,
+            confirmText: 'Sim, Excluir',
+            cancelText: 'Não, Manter'
+        });
+        if(isConfirmed){
+            try{
+                await onDeleteMonthCard(card.id);
+            } catch (error){
+                throw new Error('erro ao apagar mês de investimentos')
+            }
+        }
+    }
     const nameMonth = new Date(data.year, data.month - 1).toLocaleString('pt-BR', { month: 'long'})
     const totalInvested = data.itens
         .filter(item => item.order_type === 'BUY')
@@ -168,6 +216,21 @@ export function InvestimentCard(
                     >
                         + Investimento
                     </button>
+                    <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>   
+                                <button
+                                    onClick={() => handleDeleteMonthCard(data)}
+                                    aria-label="Deletar Mês"
+                                >
+                                    <Trash className="w-5 h-5 text-slate-400 group group-hover:text-red-500 cursor-pointer"/>
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-slate-800 text-white border-slate-700">
+                                <p>Deletar Mês</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </div>
             <div className="p-5">
@@ -201,6 +264,7 @@ export function InvestimentCard(
                                     key={item.id}
                                     item={item}
                                     onEditClick={setIsEditingItemId}
+                                    onDeleteClick={handleDeleteClick}
                                 />
                             )
                         ))}

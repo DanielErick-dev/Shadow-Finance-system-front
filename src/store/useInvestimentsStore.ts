@@ -2,34 +2,48 @@ import api from '@base/lib/api'
 import { create } from 'zustand'
 import { ItemInvestiment, CardInvestimentMonth, NewMonthCard } from '@base/types/investiments'
 import { toast } from 'react-hot-toast'
+import { InvestimentFormData } from '@base/components/investiments/AddInvestimentForm'
 
 type DividendFilters = {
     year?: number | string;
     month?: number | string;
 }
 
+type PaginatedResponse<T> = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: T[];
+}
+
 type InvestimentsState = {
+    count: number;
     cards: CardInvestimentMonth[]
     loading: boolean;
     error: null | string;
-    fetchInvestiments: (filters?: DividendFilters) => Promise<void>;
+    fetchInvestiments: (filters?: DividendFilters, page?: number) => Promise<void>;
     updateInvestiments: (itemId: number, updatedItemData: Omit<ItemInvestiment, 'id'>) => Promise<void>;
+    deleteInvestiments: (itemId: number) => Promise<void>;
     addInvestiments: (cardId: number, newInvestiment: Omit<ItemInvestiment, 'id'>) => Promise<void>;
+    deleteMonthCard: (cardId: number) => Promise<void>;
     addMonthCard: (data: NewMonthCard) => Promise<void>
 }
 
 export const useInvestimentStore = create<InvestimentsState>((set, get) => ({
+    count: 0,
     cards: [],
     loading: false,
     error: null,
-    fetchInvestiments: async (filters = {}) => {
+    fetchInvestiments: async (filters = {}, page = 1) => {
         set({ loading: true, error: null})
         try{
-            const response = await api.get('/cards-investiments/', {
-                params: { ...filters }
+            const response = await api.get<PaginatedResponse<CardInvestimentMonth>>
+            ('/cards-investiments/', {
+                params: { ...filters, page }
             })
             set({
-                cards: response.data,
+                cards: response.data.results,
+                count: response.data.count,
                 loading: false
             })
         } catch (error){
@@ -87,7 +101,31 @@ export const useInvestimentStore = create<InvestimentsState>((set, get) => ({
             error: (err: any) => err.response?.data?.detail || 'erro ao adicionar registro de mês'
         })
         await get().fetchInvestiments();
-    }
+    },
+    deleteInvestiments: async (itemId) => {
+        const promise = api.delete(`/itens-investiments/${itemId}/`);
+        await toast.promise(promise, {
+            loading: 'Deletando Investimento..',
+            success: 'Investimento Deletado com Sucesso',
+            error: 'Não foi possivel deletar o investimento'
+        });
+        set(state => ({
+            cards: state.cards.map(card => ({
+                ...card,
+                itens: card.itens.filter(item => item.id !== itemId)
+            }))
+        }));
+        await get().fetchInvestiments();
+    },
+    deleteMonthCard: async(cardId) => {
+        const promise = api.delete(`/cards-investiments/${cardId}/`)
+        await toast.promise(promise, {
+            loading: 'Deletando Card de Investimento...',
+            success: 'Card Deletado com Sucesso',
+            error: 'Não foi possivel deletar o Card'
+        });
+        await get().fetchInvestiments();
+    },
 }))
 
 

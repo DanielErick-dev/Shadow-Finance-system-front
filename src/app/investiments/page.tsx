@@ -6,19 +6,25 @@ import BackButton from "@base/components/ui/custom/backButton"
 import GenericFormModal from "@base/components/ui/custom/GenericFormModal"
 import { Label } from "@base/components/ui/label"
 import { useAssetsStore } from "@base/store/useAssetsStore"
+import ReusablePagination from "@base/components/ui/custom/ReusablePagination"
 
 export default function Investiments(){
   const {
+    count,
     cards,
     loading: investimentLoading,
     error: investimentError,
     fetchInvestiments,
     updateInvestiments,
+    deleteInvestiments,
     addMonthCard,
+    deleteMonthCard,
     addInvestiments } = useInvestimentStore();
   
   const { assets, loading: assetsLoading, error: assetsError, fetchAssets } = useAssetsStore();
   const [isSubmittingMonth, setIsSubmittingMonth] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itensPerPage = 3;
   const [newMonthData, setNewMonthData] = useState({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
@@ -29,10 +35,14 @@ export default function Investiments(){
   })
 
   useEffect(() => {
-    fetchInvestiments(filters);
+    fetchInvestiments(filters, currentPage);
     fetchAssets();
-  }, [fetchInvestiments, fetchAssets, filters]);
+  }, [fetchInvestiments, fetchAssets, filters, currentPage]);
 
+  const handlePageChange = (page:number) => {
+    setCurrentPage(page);
+  }
+  const totalPages = Math.ceil(count / itensPerPage)
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value} = e.target;
     setFilters((prev) => ({
@@ -129,7 +139,7 @@ export default function Investiments(){
                   id="month"
                   value={newMonthData.month}
                   onChange={handleNewMonthChange}
-                  className="block w-full bg-slate-800 border-2 border-slate-700
+                  className="p-2 block w-full bg-slate-800 border-2 border-slate-700
                   focus:border-purple-500 focus:ring-purple-500 rounded-md"
                 
                 >
@@ -153,7 +163,7 @@ export default function Investiments(){
                   type="number"
                   value={newMonthData.year}
                   onChange={handleNewMonthChange}
-                  className="block w-full bg-slate-800 border-2 border-slate-700
+                  className="p-2 block w-full bg-slate-800 border-2 border-slate-700
                   rounded-md focus:border-purple-500 focus:ring-purple-500"
                   min={2000}
                   max={new Date().getFullYear() + 10}
@@ -227,10 +237,21 @@ export default function Investiments(){
               data={card}
               onAddInvestiment={addInvestiments}
               onUpdateInvestiment={updateInvestiments}
+              onDeleteInvestiment={deleteInvestiments}
+              onDeleteMonthCard={deleteMonthCard}
               availableAssets={assets}
             />
           ))}
         </div>
+      </div>
+      <div className="mt-10">
+        <ReusablePagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+
+        
       </div>
     </div>
   )

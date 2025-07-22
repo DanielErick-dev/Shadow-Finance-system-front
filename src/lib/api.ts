@@ -31,7 +31,7 @@ api.interceptors.response.use(
                     window.location.href = '/auth/login';
                     return Promise.reject(error);
                 }
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/token/refresh/`, {
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}token/refresh/`, {
                     refresh: refreshToken
                 });
                 const newAccessToken = response.data.access;

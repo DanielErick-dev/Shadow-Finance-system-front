@@ -33,7 +33,7 @@ export default function ExpensesLayout({ children }: { children: ReactNode }) {
 
     return (
         <div className="min-h-screen bg-slate-950 text-slate-200 md:grid md:grid-cols-[250px_1fr]">
-            <aside className="hidden md:flex md:flex-col p-6 border-r border-slate-800">
+            <aside className="hidden md:flex md:flex-col p-3 border-r border-slate-800">
                 <h2 className="text-lg font-semibold text-purple-300 tracking-wider mb-6">
                     PAINEL DE DESPESAS
                 </h2>
@@ -53,10 +53,7 @@ export default function ExpensesLayout({ children }: { children: ReactNode }) {
                 </nav>
             </aside>
 
-            {/* --- Conteúdo Principal --- */}
-            {/* O conteúdo principal agora gerencia seu próprio container e padding */}
             <main className="py-6 sm:py-10">
-                {/* Navegação para Telas Pequenas (Mobile) */}
                 <div className="md:hidden mb-6 px-4">
                     <select
                         className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
@@ -71,9 +68,7 @@ export default function ExpensesLayout({ children }: { children: ReactNode }) {
                     </select>
                 </div>
                 
-                {/* O container agora está AQUI, envolvendo apenas os children */}
-                <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-                    {/* O conteúdo da página atual (page.tsx) será renderizado aqui */}
+                <div className="container mx-auto px-2 md:px-6 max-w-7xl">
                     {children}
                 </div>
             </main>

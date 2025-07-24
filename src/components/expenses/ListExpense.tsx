@@ -2,13 +2,19 @@
 
 import type { Expense } from "@base/types/expenses";
 import { Pencil, Trash2, Calendar, Tag } from "lucide-react";
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@base/components/ui/tooltip";
+import { CheckCircle } from "lucide-react";
 
 type ExpenseListProps = {
     expenses: Expense[];
+    onMarkAsPaid: (expenseId: number) => Promise<void>;
 };
+type ExpenseCardProps = {
+    expense: Expense;
+    markAsPaid: (expenseId: number) => void;
+}
 
-
-function ExpenseCard({ expense }: { expense: Expense }) {
+function ExpenseCard({ expense, markAsPaid }: ExpenseCardProps) {
     const isPaid = expense.paid;
     const statusClasses = isPaid
         ? "border-green-500/30 hover:border-green-500/60"
@@ -34,12 +40,51 @@ function ExpenseCard({ expense }: { expense: Expense }) {
                         )}
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                        <button onClick={() => alert(`Editar: ${expense.name}`)} className="p-1.5 rounded-full hover:bg-slate-700 group" title="Editar">
-                            <Pencil className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-400" />
-                        </button>
-                        <button onClick={() => alert(`Deletar: ${expense.name}`)} className="p-1.5 rounded-full hover:bg-slate-700 group" title="Deletar">
-                            <Trash2 className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500" />
-                        </button>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>  
+                                    <button 
+                                        onClick={() => alert(`Editar: ${expense.name}`)} className="p-1.5 rounded-full hover:bg-slate-700 group" title="Editar">
+                                            <Pencil className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-400 cursor-pointer hover:scale-100" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                    Editar Despesa
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>  
+                                    <button 
+                                        onClick={() => alert(`Deletar: ${expense.name}`)}
+                                        className="p-1.5 rounded-full hover:bg-slate-700 group" title="Deletar">
+                                            <Trash2 className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500 cursor-pointer" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                    Deletar Despesa
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        {!expense.paid && (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <button
+                                            onClick={() => markAsPaid(expense.id)}
+                                            className="p-1.5 rounded-full hover:bg-slate-700 group"
+                                            title="Marcar Como Paga"
+                                        >
+                                            <CheckCircle className="w-3.5 h-3.5 text-slate-400 group-hover:text-green-500"/>
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                        Marcar Como Paga
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        )}
                     </div>
                 </div>
             </div>
@@ -77,7 +122,7 @@ function ExpenseCard({ expense }: { expense: Expense }) {
     );
 }
 
-export default function ExpenseList({ expenses }: ExpenseListProps) {
+export default function ExpenseList({ expenses, onMarkAsPaid }: ExpenseListProps) {
     if (!expenses || expenses.length === 0) {
         return (
             <div className="text-center py-16 rounded-xl bg-slate-900 border border-dashed border-slate-700">
@@ -91,7 +136,7 @@ export default function ExpenseList({ expenses }: ExpenseListProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {expenses.map((expense) => (
-                <ExpenseCard key={expense.id} expense={expense} />
+                <ExpenseCard key={expense.id} expense={expense} markAsPaid={onMarkAsPaid}/>
             ))}
         </div>
     );

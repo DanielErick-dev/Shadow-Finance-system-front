@@ -3,9 +3,10 @@ import toast from "react-hot-toast";
 import type { Expense, Category } from "@base/types/expenses";
 import { create } from "zustand";
 
-type DateFilters = {
+type ExpenseFilters = {
     due_date__year?: number | string;
     due_date__month?: number | string;
+    search?: string;
 }
 
 export type ExpensesState = {
@@ -13,10 +14,11 @@ export type ExpensesState = {
     categories: Category[];
     loading: boolean;
     error: string | null;
-    fetchExpenses: (filters?: DateFilters) => Promise<void>;
+    fetchExpenses: (filters?: ExpenseFilters) => Promise<void>;
     fetchCategories: () => Promise<void>;
     addExpense: (expenseData: Omit<Expense, 'id'>) => Promise<void>;
     addCategory: (categoryData: Omit<Category, 'id'>) => Promise<void>;
+    markAsPaid: (expenseId: number) => Promise<void>;
 }
 
 export const useExpensesStore = create<ExpensesState>((set, get) => ({
@@ -29,7 +31,7 @@ export const useExpensesStore = create<ExpensesState>((set, get) => ({
         set({ error: null, loading: true });
         try {
             const response = await api.get<Expense[]>('/expenses/', {
-                params: { ...filters }
+                params: filters
             });
             set({ expenses: response.data, loading: false });
         } catch (error) {
@@ -76,6 +78,17 @@ export const useExpensesStore = create<ExpensesState>((set, get) => ({
             loading: 'Registrando Despesa...',
             success: 'Despesa Registrada com Sucesso!',
             error: 'Não foi possível registrar a Despesa'
+        });
+        await get().fetchExpenses();
+    },
+    markAsPaid: async (expenseId) => {
+        const promise = api.patch(`/expenses/${expenseId}/`, {
+            paid: true
+        })
+        await toast.promise(promise, {
+            loading: 'Atualizando Despesa',
+            success: 'Despesa Marcada como Paga',
+            error: 'Não foi possivel marcar a Despesa como Paga'
         });
         await get().fetchExpenses();
     }

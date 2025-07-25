@@ -3,7 +3,7 @@
 import { type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutGrid, Repeat, Layers, Tags } from 'lucide-react';
+import { LayoutGrid, Repeat, Layers, Tags, ArrowLeft } from 'lucide-react';
 
 const sidebarNavItems = [
     {
@@ -26,6 +26,11 @@ const sidebarNavItems = [
         href: "/expenses/categories",
         icon: <Tags className="h-4 w-4" />,
     },
+    {
+        title: "Voltar Pro Painel",
+        href: "/painel",
+        icon: <ArrowLeft className="h-4 w-4" />,
+    }
 ];
 
 export default function ExpensesLayout({ children }: { children: ReactNode }) {

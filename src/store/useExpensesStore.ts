@@ -17,6 +17,7 @@ export type ExpensesState = {
     fetchExpenses: (filters?: ExpenseFilters) => Promise<void>;
     fetchCategories: () => Promise<void>;
     addExpense: (expenseData: Omit<Expense, 'id'>) => Promise<void>;
+    deleteExpense: (expenseId: number) => Promise<void>;
     addCategory: (categoryData: Omit<Category, 'id'>) => Promise<void>;
     markAsPaid: (expenseId: number) => Promise<void>;
 }
@@ -80,6 +81,17 @@ export const useExpensesStore = create<ExpensesState>((set, get) => ({
             error: 'Não foi possível registrar a Despesa'
         });
         await get().fetchExpenses();
+    },
+    deleteExpense: async (expenseId) => {
+        const promise = api.delete(`/expenses/${expenseId}/`)
+        await toast.promise(promise, {
+            loading: 'Deletando Despesa...',
+            success: 'Despesa Deletada com Sucesso!',
+            error: 'Não foi possível Deletar a Despesa'
+        });
+        set(state => ({
+            expenses: state.expenses.filter(expense => expense.id !== expenseId)
+        }))
     },
     markAsPaid: async (expenseId) => {
         const promise = api.patch(`/expenses/${expenseId}/`, {

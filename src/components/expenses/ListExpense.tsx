@@ -4,17 +4,20 @@ import type { Expense } from "@base/types/expenses";
 import { Pencil, Trash2, Calendar, Tag } from "lucide-react";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@base/components/ui/tooltip";
 import { CheckCircle } from "lucide-react";
+import { useConfirmation } from "@base/contexts/ConfirmationDialogContext";
 
 type ExpenseListProps = {
     expenses: Expense[];
     onMarkAsPaid: (expenseId: number) => Promise<void>;
+    onDeleteExpense: (expenseId: number) => Promise<void>;
 };
 type ExpenseCardProps = {
     expense: Expense;
-    markAsPaid: (expenseId: number) => void;
+    markAsPaid: (expenseToMark: Expense) => Promise<void>;
+    deleteExpense: (expenseToDeleted: Expense) => Promise<void>;
 }
 
-function ExpenseCard({ expense, markAsPaid }: ExpenseCardProps) {
+function ExpenseCard({ expense, markAsPaid, deleteExpense }: ExpenseCardProps) {
     const isPaid = expense.paid;
     const statusClasses = isPaid
         ? "border-green-500/30 hover:border-green-500/60"
@@ -44,8 +47,10 @@ function ExpenseCard({ expense, markAsPaid }: ExpenseCardProps) {
                             <Tooltip>
                                 <TooltipTrigger asChild>  
                                     <button 
-                                        onClick={() => alert(`Editar: ${expense.name}`)} className="p-1.5 rounded-full hover:bg-slate-700 group" title="Editar">
-                                            <Pencil className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-400 cursor-pointer hover:scale-100" />
+                                        onClick={() => alert(`Editar: ${expense.name}`)}
+                                        className="p-1.5 rounded-full hover:bg-slate-700 group"
+                                    >
+                                        <Pencil className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-400 cursor-pointer hover:scale-100" />
                                     </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top">
@@ -57,8 +62,9 @@ function ExpenseCard({ expense, markAsPaid }: ExpenseCardProps) {
                             <Tooltip>
                                 <TooltipTrigger asChild>  
                                     <button 
-                                        onClick={() => alert(`Deletar: ${expense.name}`)}
-                                        className="p-1.5 rounded-full hover:bg-slate-700 group" title="Deletar">
+                                        onClick={() => deleteExpense(expense)}
+                                        className="p-1.5 rounded-full hover:bg-slate-700 group" 
+                                    >
                                             <Trash2 className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500 cursor-pointer" />
                                     </button>
                                 </TooltipTrigger>
@@ -72,9 +78,8 @@ function ExpenseCard({ expense, markAsPaid }: ExpenseCardProps) {
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <button
-                                            onClick={() => markAsPaid(expense.id)}
+                                            onClick={() => markAsPaid(expense)}
                                             className="p-1.5 rounded-full hover:bg-slate-700 group"
-                                            title="Marcar Como Paga"
                                         >
                                             <CheckCircle className="w-3.5 h-3.5 text-slate-400 group-hover:text-green-500"/>
                                         </button>
@@ -122,21 +127,50 @@ function ExpenseCard({ expense, markAsPaid }: ExpenseCardProps) {
     );
 }
 
-export default function ExpenseList({ expenses, onMarkAsPaid }: ExpenseListProps) {
+export default function ExpenseList({ expenses, onMarkAsPaid, onDeleteExpense }: ExpenseListProps) {
+    const { confirm } = useConfirmation();
     if (!expenses || expenses.length === 0) {
         return (
             <div className="text-center py-16 rounded-xl bg-slate-900 border border-dashed border-slate-700">
-                <svg className="mx-auto h-12 w-12 text-slate-600"><path /* ... */ /></svg>
+                <svg className="mx-auto h-12 w-12 text-slate-600"></svg>
                 <h3 className="mt-4 text-lg font-medium text-slate-300">Nenhum Registro Encontrado</h3>
                 <p className="mt-1 text-sm text-slate-500">Nenhuma despesa corresponde aos filtros selecionados.</p>
             </div>
         );
     }
-
+    const handleDeleteExpense = async (expenseToDeleted: Expense) => {
+        if(!expenseToDeleted) return;
+        const isConfirmed = await confirm({
+            title: '[ CONFIRMA EXCLUSÃO ]',
+            description: `voce realmente deseja excluir a despesa: ${expenseToDeleted.name}`,
+            confirmText: 'Sim, Excluir',
+            cancelText: 'Não, Manter'
+        });
+        if(isConfirmed){
+            await onDeleteExpense(expenseToDeleted.id);
+        };
+    }
+    const handleMarkAsPaid = async (expenseToMark: Expense) => {
+        if(!expenseToMark) return;
+        const isConfirmed = await confirm({
+            title: ' [ CONFIRMA ATUALIZAÇÃO ]',
+            description: `voce realmente deseja marcar a despesa: ${expenseToMark.name} como paga?`,
+            confirmText: 'Sim, Marcar como Pago',
+            cancelText: 'Não, Não Marcar'
+        })
+        if(isConfirmed){
+            await onMarkAsPaid(expenseToMark.id)
+        };
+    }
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {expenses.map((expense) => (
-                <ExpenseCard key={expense.id} expense={expense} markAsPaid={onMarkAsPaid}/>
+                <ExpenseCard 
+                    key={expense.id}
+                    expense={expense}
+                    markAsPaid={handleMarkAsPaid}
+                    deleteExpense={handleDeleteExpense}
+                />
             ))}
         </div>
     );

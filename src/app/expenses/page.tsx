@@ -9,7 +9,15 @@ import { ChevronDown, ChevronUp, Search, X } from "lucide-react"
 type StatusFilter = "all" | "pending" | "paid"
 
 export default function ExpensesPage() {
-  const { expenses, categories, loading, error, fetchExpenses, fetchCategories, markAsPaid } = useExpensesStore()
+  const { 
+    expenses, 
+    categories, 
+    loading, 
+    error, 
+    fetchExpenses, 
+    deleteExpense,
+    fetchCategories, 
+    markAsPaid } = useExpensesStore()
   const [isFiltersOpen, setIsFiltersOpen] = useState(true)
   const [searchInput, setSearchInput] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
@@ -288,7 +296,8 @@ export default function ExpensesPage() {
             <div className="relative">
               <ExpenseList
                 expenses={filteredExpenses}
-                onMarkAsPaid={markAsPaid} 
+                onMarkAsPaid={markAsPaid}
+                onDeleteExpense={deleteExpense} 
               />
             </div>
           </div>

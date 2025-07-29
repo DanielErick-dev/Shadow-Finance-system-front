@@ -66,6 +66,7 @@ export default function EditAssetModalWrapper({ assetToEdit, onClose }: EditAsse
             description="「 Modifique os detalhes do seu ativo na carteira 」"
             isSubmitting={isSubmitting}
             onSubmit={handleSubmit}
+            useInternalForm={true}
             submitText="SALVAR ALTERAÇÕES"
         >
             <div className="space-y-4">

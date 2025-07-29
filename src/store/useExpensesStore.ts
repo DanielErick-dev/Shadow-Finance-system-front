@@ -1,11 +1,11 @@
 import api from "@base/lib/api";
 import toast from "react-hot-toast";
-import type { Expense, Category } from "@base/types/expenses";
+import type { Expense, Category, ExpenseFormData } from "@base/types/expenses";
 import { create } from "zustand";
 
 type ExpenseFilters = {
-    due_date__year?: number | string;
-    due_date__month?: number | string;
+    due_date__year?: number
+    due_date__month?: number
     search?: string;
 }
 
@@ -16,8 +16,9 @@ export type ExpensesState = {
     error: string | null;
     fetchExpenses: (filters?: ExpenseFilters) => Promise<void>;
     fetchCategories: () => Promise<void>;
-    addExpense: (expenseData: Omit<Expense, 'id'>) => Promise<void>;
+    addExpense: (expenseData: ExpenseFormData) => Promise<void>;
     deleteExpense: (expenseId: number) => Promise<void>;
+    updateExpense: (ExpenseId: number, ExpenseData: ExpenseFormData) => Promise<void>;
     addCategory: (categoryData: Omit<Category, 'id'>) => Promise<void>;
     markAsPaid: (expenseId: number) => Promise<void>;
 }
@@ -65,16 +66,7 @@ export const useExpensesStore = create<ExpensesState>((set, get) => ({
     },
 
     addExpense: async (expenseData) => {
-        const dataToApi = {
-            name: expenseData.name,
-            amount: expenseData.amount,
-            due_date: expenseData.due_date,
-            payment_date: expenseData.payment_date,
-            paid: expenseData.paid,
-            category_id: expenseData.category ? expenseData.category.id : null
-        };
-
-        const promise = api.post('/expenses/', dataToApi);
+        const promise = api.post('/expenses/', expenseData);
         await toast.promise(promise, {
             loading: 'Registrando Despesa...',
             success: 'Despesa Registrada com Sucesso!',
@@ -92,6 +84,15 @@ export const useExpensesStore = create<ExpensesState>((set, get) => ({
         set(state => ({
             expenses: state.expenses.filter(expense => expense.id !== expenseId)
         }))
+    },
+    updateExpense: async (expenseId, expenseData) => {
+        const promise = api.put(`/expenses/${expenseId}/`, expenseData)
+        await toast.promise(promise, {
+            loading: 'Atualizando Despesa...',
+            success: 'Despesa Atualizada com Sucesso',
+            error: 'Não foi Possivel Atualizar a Despesa'
+        });
+        await get().fetchExpenses()
     },
     markAsPaid: async (expenseId) => {
         const promise = api.patch(`/expenses/${expenseId}/`, {

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Expense } from "@base/types/expenses";
+import type { Expense, ExpenseFormData} from "@base/types/expenses";
 import { Pencil, Trash2, Calendar, Tag } from "lucide-react";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@base/components/ui/tooltip";
 import { CheckCircle } from "lucide-react";
@@ -10,14 +10,16 @@ type ExpenseListProps = {
     expenses: Expense[];
     onMarkAsPaid: (expenseId: number) => Promise<void>;
     onDeleteExpense: (expenseId: number) => Promise<void>;
+    onEditExpense: (expense: Expense) => void;
 };
 type ExpenseCardProps = {
     expense: Expense;
     markAsPaid: (expenseToMark: Expense) => Promise<void>;
     deleteExpense: (expenseToDeleted: Expense) => Promise<void>;
+    editExpense: (expense: Expense) => void;
 }
 
-function ExpenseCard({ expense, markAsPaid, deleteExpense }: ExpenseCardProps) {
+function ExpenseCard({ expense, markAsPaid, deleteExpense, editExpense }: ExpenseCardProps) {
     const isPaid = expense.paid;
     const statusClasses = isPaid
         ? "border-green-500/30 hover:border-green-500/60"
@@ -47,7 +49,7 @@ function ExpenseCard({ expense, markAsPaid, deleteExpense }: ExpenseCardProps) {
                             <Tooltip>
                                 <TooltipTrigger asChild>  
                                     <button 
-                                        onClick={() => alert(`Editar: ${expense.name}`)}
+                                        onClick={() => editExpense(expense)}
                                         className="p-1.5 rounded-full hover:bg-slate-700 group"
                                     >
                                         <Pencil className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-400 cursor-pointer hover:scale-100" />
@@ -127,7 +129,7 @@ function ExpenseCard({ expense, markAsPaid, deleteExpense }: ExpenseCardProps) {
     );
 }
 
-export default function ExpenseList({ expenses, onMarkAsPaid, onDeleteExpense }: ExpenseListProps) {
+export default function ExpenseList({ expenses, onMarkAsPaid, onDeleteExpense, onEditExpense }: ExpenseListProps) {
     const { confirm } = useConfirmation();
     if (!expenses || expenses.length === 0) {
         return (
@@ -170,6 +172,7 @@ export default function ExpenseList({ expenses, onMarkAsPaid, onDeleteExpense }:
                     expense={expense}
                     markAsPaid={handleMarkAsPaid}
                     deleteExpense={handleDeleteExpense}
+                    editExpense={onEditExpense}
                 />
             ))}
         </div>

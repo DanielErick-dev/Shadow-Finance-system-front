@@ -1,16 +1,15 @@
 "use client"
-import { useState, type FormEvent } from "react";
-import type { Category, NewExpenseData } from "@base/types/expenses";
+import { useEffect, useState, type FormEvent } from "react";
+import type { Category, ExpenseFormData, Expense } from "@base/types/expenses";
 import toast from "react-hot-toast";
 import { Label } from "@base/components/ui/label";
 import { Input } from "@base/components/ui/input";
 import { Checkbox } from "@base/components/ui/checkbox";
 import { AnimatePresence, motion } from "framer-motion";
 
-export type ExpenseFormData = NewExpenseData;
-
 type Props = {
     onSave: (formData: ExpenseFormData) => Promise<void>;
+    initialData?: Expense | null;
     onCancel: () => void;
     availableCategories: Category[];
     submitButtonText?: string;
@@ -20,6 +19,7 @@ type Props = {
 export default function AddExpenseForm({
     onSave,
     onCancel,
+    initialData,
     availableCategories,
     submitButtonText = 'Registrar',
     onRequestClose
@@ -32,7 +32,27 @@ export default function AddExpenseForm({
         payment_date: null,
         category_id: null,
     });
-
+    useEffect(() => {
+        if(initialData){
+            setForm({
+                name: initialData.name,
+                amount: String(initialData.amount),
+                due_date: initialData.due_date,
+                paid: initialData.paid,
+                payment_date: initialData.payment_date,
+                category_id: initialData.category?.id ?? null
+            })
+        } else{
+            setForm({
+                name: '',
+                amount: '',
+                due_date: new Date().toISOString().split('T')[0],
+                paid: false,
+                payment_date: null,
+                category_id: null,
+            })
+        }
+    }, [initialData])
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const {name, value, type} = e.target
         if(type === 'checkbox'){
@@ -51,6 +71,7 @@ export default function AddExpenseForm({
     };
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        console.log('handle submit sendo chamado')
         if(!form.name.trim()){
             toast.error('o nome da despesa é obrigatório');
             return;
@@ -59,9 +80,9 @@ export default function AddExpenseForm({
             toast.error('O valor da despesa deve ser positivo');
             return;
         };
-        const dataToSave: NewExpenseData = {
+        const dataToSave: ExpenseFormData = {
             ...form,
-            amount: Number(form.amount),
+            amount: form.amount,
             category_id: form.category_id ? Number(form.category_id): null,
         };
         await onSave(dataToSave);
@@ -130,7 +151,7 @@ export default function AddExpenseForm({
             </div>
             <div className="space-y-2 pt-2">
                 <Label
-                    htmlFor="category_id ?? ''"
+                    htmlFor="category_id"
                     className="text-sm font-semibold text-purple-300 block"
                 >
                     CATEGORIA
@@ -215,18 +236,13 @@ export default function AddExpenseForm({
                     Cancelar
                 </button>
                 <motion.button
+                    type="submit"
                     whileTap={{ scale: 0.95 }}
                     whileHover={{ scale: 1.02 }}
                     transition={{ type: "spring", stiffness: 300 }}
-                    className="..."
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-all duration-200 font-medium shadow-lg shadow-purple-500/25"
                 >
-                    
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-all duration-200 font-medium shadow-lg shadow-purple-500/25"
-                    >
-                        {submitButtonText}
-                    </button>
+                    {submitButtonText}
                 </motion.button>
             </div>
         </form>

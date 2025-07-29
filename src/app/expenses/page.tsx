@@ -5,6 +5,8 @@ import { useExpensesStore } from "@base/store/useExpensesStore"
 import ExpenseList from "@base/components/expenses/ListExpense"
 import { ChevronDown, ChevronUp, Search, X } from "lucide-react"
 import AddExpenseModalWrapper from "@base/components/expenses/AddExpenseModalWrapper"
+import EditExpenseModalWrapper from "@base/components/expenses/EditExpenseModalWrapper"
+import type { Expense } from "@base/types/expenses"
 
 type StatusFilter = "all" | "pending" | "paid"
 
@@ -16,12 +18,13 @@ export default function ExpensesPage() {
     error, 
     fetchExpenses, 
     deleteExpense,
+    updateExpense,
     fetchCategories, 
     markAsPaid } = useExpensesStore()
   const [isFiltersOpen, setIsFiltersOpen] = useState(true)
   const [searchInput, setSearchInput] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
-
+  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
   const [dateFilters, setDateFilters] = useState({
     due_date__year: "",
     due_date__month: "",
@@ -42,7 +45,8 @@ export default function ExpensesPage() {
   useEffect(() => {
     if (dateFilters.due_date__year && dateFilters.due_date__month) {
       const allFilters = {
-        ...dateFilters,
+        due_date__year: Number(dateFilters.due_date__year),
+        due_date__month: Number(dateFilters.due_date__month),
         search: searchTerm,
       }
       fetchExpenses(allFilters)
@@ -299,9 +303,14 @@ export default function ExpensesPage() {
               <ExpenseList
                 expenses={filteredExpenses}
                 onMarkAsPaid={markAsPaid}
+                onEditExpense={setExpenseToEdit}
                 onDeleteExpense={deleteExpense} 
               />
             </div>
+            <EditExpenseModalWrapper
+              expenseToEdit={expenseToEdit}
+              onClose={() => setExpenseToEdit(null)}
+            />
           </div>
         </div>
       </div>

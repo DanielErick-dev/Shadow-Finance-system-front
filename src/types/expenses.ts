@@ -13,9 +13,9 @@ export type Expense = {
     paid: boolean;
 }
 
-export type NewExpenseData = {
+export type ExpenseFormData = {
     name: string;
-    amount: number | string;
+    amount: string;
     due_date: string;
     paid: boolean;
     payment_date: string | null;

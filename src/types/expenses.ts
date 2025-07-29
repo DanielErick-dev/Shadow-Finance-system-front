@@ -12,3 +12,16 @@ export type Expense = {
     category: Category | null;
     paid: boolean;
 }
+
+export type NewExpenseData = {
+    name: string;
+    amount: number | string;
+    due_date: string;
+    paid: boolean;
+    payment_date: string | null;
+    category_id: number | null;
+}
+
+export type NewCategoryData = {
+    name: string;
+}

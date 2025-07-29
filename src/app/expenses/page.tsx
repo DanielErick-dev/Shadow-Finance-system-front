@@ -1,10 +1,10 @@
 "use client"
-
 import type React from "react"
 import { useMemo, useEffect, useState } from "react"
 import { useExpensesStore } from "@base/store/useExpensesStore"
 import ExpenseList from "@base/components/expenses/ListExpense"
 import { ChevronDown, ChevronUp, Search, X } from "lucide-react"
+import AddExpenseModalWrapper from "@base/components/expenses/AddExpenseModalWrapper"
 
 type StatusFilter = "all" | "pending" | "paid"
 
@@ -127,7 +127,6 @@ export default function ExpensesPage() {
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                   className="block w-full pl-9 pr-3 py-2 text-sm bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50"
                   placeholder="Insira o Nome da Despesa"
                 />
@@ -161,6 +160,9 @@ export default function ExpensesPage() {
                     <ChevronDown className="h-4 w-4 text-slate-400" />
                   )}
                 </button>
+              </div>
+              <div className="w-full sm:w-auto">
+                <AddExpenseModalWrapper/>
               </div>
             </div>
           </div>
@@ -227,7 +229,7 @@ export default function ExpensesPage() {
                         <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-400/20 to-purple-600/20 animate-pulse"></div>
                       )}
                     </button>
-
+ 
                     <button
                       onClick={() => setStatusFilter("pending")}
                       className={`relative group px-4 py-2 text-xs font-medium rounded-lg transition-all duration-300 active:scale-95 ${

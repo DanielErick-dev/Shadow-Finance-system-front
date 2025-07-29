@@ -119,6 +119,7 @@ export default function DividendPage(){
                         description="[selecione o mês e ano para criar um novo registro de dividendos]"
                         isSubmitting={isSubmittingMonth}
                         onSubmit={handleAddMonthSubmit}
+                        useInternalForm={true}
                         submitText="CRIAR REGISTRO"
                         triggerButton={
                             <button

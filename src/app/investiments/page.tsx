@@ -110,6 +110,7 @@ export default function Investiments(){
             isSubmitting={isSubmittingMonth}
             onSubmit={handleAddMonthSubmit}
             submitText="CRIAR REGISTRO"
+            useInternalForm={true}
             triggerButton={
             <button className="flex items-center bg-gradient-to-r from-purple-600 to-blue-600
             text-white font-semibold px-4 py-2 cursor-pointer rounded-lg hover:from-purple-500 hover:to-blue-500 transition-colors shadow-lg duration-200 

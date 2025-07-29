@@ -41,8 +41,9 @@ export default function AddAssetModalWrapper() {
             title="[ ADICIONAR NOVO ATIVO ]"
             description="「 Registre um novo ativo em sua carteira 」"
             isSubmitting={isSubmitting}
-            onSubmit={handleSubmit}
             submitText="REGISTRAR ATIVO"
+            useInternalForm={true}
+            onSubmit={handleSubmit}
             triggerButton={
                 <button
                     type="button"

@@ -2,10 +2,10 @@
 import type React from "react"
 import { useMemo, useEffect, useState } from "react"
 import { useExpensesStore } from "@base/store/useExpensesStore"
-import ExpenseList from "@base/components/expenses/ListExpense"
+import ExpenseList from "@base/components/single_expenses/ListExpense"
 import { ChevronDown, ChevronUp, Search, X } from "lucide-react"
-import AddExpenseModalWrapper from "@base/components/expenses/AddExpenseModalWrapper"
-import EditExpenseModalWrapper from "@base/components/expenses/EditExpenseModalWrapper"
+import AddExpenseModalWrapper from "@base/components/single_expenses/AddExpenseModalWrapper"
+import EditExpenseModalWrapper from "@base/components/single_expenses/EditExpenseModalWrapper"
 import type { Expense } from "@base/types/expenses"
 
 type StatusFilter = "all" | "pending" | "paid"

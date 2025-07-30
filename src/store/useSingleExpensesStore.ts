@@ -11,24 +11,19 @@ type ExpenseFilters = {
 
 export type ExpensesState = {
     expenses: Expense[];
-    categories: Category[];
     loading: boolean;
     error: string | null;
     fetchExpenses: (filters?: ExpenseFilters) => Promise<void>;
-    fetchCategories: () => Promise<void>;
     addExpense: (expenseData: ExpenseFormData) => Promise<void>;
     deleteExpense: (expenseId: number) => Promise<void>;
     updateExpense: (ExpenseId: number, ExpenseData: ExpenseFormData) => Promise<void>;
-    addCategory: (categoryData: Omit<Category, 'id'>) => Promise<void>;
     markAsPaid: (expenseId: number) => Promise<void>;
 }
 
 export const useExpensesStore = create<ExpensesState>((set, get) => ({
     expenses: [],
-    categories: [],
     loading: false,
     error: null,
-
     fetchExpenses: async (filters = {}) => {
         set({ error: null, loading: true });
         try {
@@ -42,29 +37,6 @@ export const useExpensesStore = create<ExpensesState>((set, get) => ({
             toast.error(errorMessage);
         }
     },
-
-    fetchCategories: async () => {
-        try {
-            const response = await api.get<Category[]>('/categories/');
-            set({ categories: response.data });
-        } catch (error) {
-            const errorMessage = 'Não foi possível carregar as categorias';
-            set({ error: errorMessage });
-            toast.error(errorMessage);
-        }
-    },
-    
-
-    addCategory: async (categoryData) => {
-        const promise = api.post('/categories/', categoryData); 
-        await toast.promise(promise, {
-            loading: 'Criando Nova Categoria...',
-            success: 'Categoria Criada com Sucesso!',
-            error: (err: any) => err.response?.data?.name?.[0] || 'Falha ao criar Categoria'
-        });
-        await get().fetchCategories();
-    },
-
     addExpense: async (expenseData) => {
         const promise = api.post('/expenses/', expenseData);
         await toast.promise(promise, {

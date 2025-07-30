@@ -7,20 +7,19 @@ import { ChevronDown, ChevronUp, Search, X } from "lucide-react"
 import AddExpenseModalWrapper from "@base/components/single_expenses/AddExpenseModalWrapper"
 import EditExpenseModalWrapper from "@base/components/single_expenses/EditExpenseModalWrapper"
 import type { Expense } from "@base/types/expenses"
+import { useCategoryStore } from "@base/store/useCategoryStore"
 
 type StatusFilter = "all" | "pending" | "paid"
 
 export default function ExpensesPage() {
   const { 
     expenses, 
-    categories, 
     loading, 
     error, 
     fetchExpenses, 
     deleteExpense,
-    updateExpense,
-    fetchCategories, 
     markAsPaid } = useExpensesStore()
+  const { categories, fetchCategories } = useCategoryStore();
   const [isFiltersOpen, setIsFiltersOpen] = useState(true)
   const [searchInput, setSearchInput] = useState("")
   const [searchTerm, setSearchTerm] = useState("")

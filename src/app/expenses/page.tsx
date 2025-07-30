@@ -1,7 +1,7 @@
 "use client"
 import type React from "react"
 import { useMemo, useEffect, useState } from "react"
-import { useExpensesStore } from "@base/store/useExpensesStore"
+import { useExpensesStore } from "@base/store/useSingleExpensesStore"
 import ExpenseList from "@base/components/single_expenses/ListExpense"
 import { ChevronDown, ChevronUp, Search, X } from "lucide-react"
 import AddExpenseModalWrapper from "@base/components/single_expenses/AddExpenseModalWrapper"

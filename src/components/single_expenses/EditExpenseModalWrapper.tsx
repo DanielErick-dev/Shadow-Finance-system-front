@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import GenericFormModal from "@base/components/ui/custom/GenericFormModal";
 import AddExpenseForm from "@base/components/expenses/AddExpenseForm";
-import { useExpensesStore } from "@base/store/useExpensesStore";
+import { useExpensesStore } from "@base/store/useSingleExpensesStore";
 import type { Expense, Category, ExpenseFormData } from "@base/types/expenses";
 
 type EditExpenseModalWrapperProps = {

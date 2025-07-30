@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import GenericFormModal from "@base/components/ui/custom/GenericFormModal";
 import AddExpenseForm from "@base/components/expenses/AddExpenseForm";
 import { ExpenseFormData } from "@base/types/expenses";
-import { useExpensesStore } from "@base/store/useExpensesStore";
+import { useExpensesStore } from "@base/store/useSingleExpensesStore";
 import { Layers, Repeat, FilePlus } from "lucide-react";
 type ModalStep = 'selection' | 'single_expense' | 'recurring' | 'installment'
 

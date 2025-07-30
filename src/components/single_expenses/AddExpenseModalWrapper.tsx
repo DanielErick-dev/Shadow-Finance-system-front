@@ -1,10 +1,11 @@
 "use client"
 import { useState, type ReactNode } from "react";
 import GenericFormModal from "@base/components/ui/custom/GenericFormModal";
-import AddExpenseForm from "@base/components/expenses/AddExpenseForm";
+import AddExpenseForm from "@base/components/single_expenses/AddExpenseForm";
 import { ExpenseFormData } from "@base/types/expenses";
 import { useExpensesStore } from "@base/store/useSingleExpensesStore";
 import { Layers, Repeat, FilePlus } from "lucide-react";
+import { useCategoryStore } from "@base/store/useCategoryStore";
 type ModalStep = 'selection' | 'single_expense' | 'recurring' | 'installment'
 
 type SelectionButtonProps = {
@@ -46,8 +47,8 @@ export default function AddExpenseModalWrapper(){
     const [step, setStep] = useState<ModalStep>('selection');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [modalOpen, setModalOpen] = useState(false)
-    const { addExpense, categories } = useExpensesStore();
-
+    const { addExpense } = useExpensesStore();
+    const { categories } = useCategoryStore();
     const handleBack = () => setStep('selection');
 
     const handleSingleExpenseSubmit = async (formData: ExpenseFormData) => {

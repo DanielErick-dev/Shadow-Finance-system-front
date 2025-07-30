@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import GenericFormModal from "@base/components/ui/custom/GenericFormModal";
-import AddExpenseForm from "@base/components/expenses/AddExpenseForm";
+import AddExpenseForm from "@base/components/single_expenses/AddExpenseForm";
 import { useExpensesStore } from "@base/store/useSingleExpensesStore";
 import type { Expense, Category, ExpenseFormData } from "@base/types/expenses";
+import { useCategoryStore } from "@base/store/useCategoryStore";
 
 type EditExpenseModalWrapperProps = {
     expenseToEdit: Expense | null;
@@ -16,8 +17,8 @@ export default function EditExpenseModalWrapper({
     onClose
 }: EditExpenseModalWrapperProps){
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { updateExpense, categories } = useExpensesStore();
-
+    const { updateExpense } = useExpensesStore();
+    const { categories } = useCategoryStore();
     const handleSubmit = async (formData: ExpenseFormData) => {
         if(!expenseToEdit) return;
         setIsSubmitting(true);

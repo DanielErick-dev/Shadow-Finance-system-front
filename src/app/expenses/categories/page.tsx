@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useCategoryStore } from "@base/store/useCategoryStore";
 import { Pencil, Trash2, Wallet } from "lucide-react";
+import AddCategoryModalWrapper from "@base/components/category_expenses/AddCategoryModalWrapper";
 export default function CategoriesExpensesPage(){
     const { categories, fetchCategories, error, loading } = useCategoryStore();
 
@@ -32,12 +33,7 @@ export default function CategoriesExpensesPage(){
                     bg-gradient-to-r from-purple-400 to-blue-400 mb-4 sm:mb-0 text-center w-full sm:w-auto">
                         GESTÃO DE CATEGORIAS
                     </h1>
-                    <button 
-                        className="bg-gradient-to-r from-purple-700 to-purple-600 border border-purple-900/20 rounded-md font-semibold text-white shadow-sm
-                        hover:from-purple-600 hover:to-purple-500 hover:shadow-purple-500/30 duration-300 active:scale-95 transition-all px-4 py-2 w-full sm:w-auto cursor-pointer"
-                    >
-                        ADICIONAR CATEGORIA
-                    </button>
+                    <AddCategoryModalWrapper/>
                 </header>
                 <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-lg shadow-purple-900/20 overflow-hidden">
                     <table className="w-full text-left">

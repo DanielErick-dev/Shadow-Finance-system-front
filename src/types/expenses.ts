@@ -25,3 +25,20 @@ export type ExpenseFormData = {
 export type NewCategoryData = {
     name: string;
 }
+
+export type InstallmentExpense = {
+    id: number;
+    name: string;
+    total_amount: string;
+    installments_quantity: number;
+    first_due_date: string;
+    category: Category | null;
+}
+
+export type NewInstallmentExpenseData = {
+    name: string;
+    total_amount: number;
+    installments_quantity: number;
+    first_due_date: string;
+    category_id: number | null;
+}

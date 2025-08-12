@@ -32,15 +32,17 @@ export default function ExpensesPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(true)
   const [searchInput, setSearchInput] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
+  const now = new Date();
+  const currentMonthString = (now.getMonth() + 1).toString().padStart(2, '0')
+  const currentYearString = (now.getFullYear());
   const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null)
   const [dateFilters, setDateFilters] = useState({
-    due_date__year: "",
-    due_date__month: "",
+    due_date__year: currentYearString.toString(),
+    due_date__month: currentMonthString,
   })
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
-  const currentYear = new Date().getFullYear()
-  const availableYears = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString())
+  const availableYears = Array.from({ length: 5 }, (_, i) => (currentYearString - i).toString())
 
   const handleSearch = () => {
     setSearchTerm(searchInput)
@@ -60,8 +62,8 @@ export default function ExpensesPage() {
 
   const clearFilters = () => {
     setDateFilters({
-      due_date__year: "",
-      due_date__month: "",
+      due_date__year: currentYearString.toString(),
+      due_date__month: currentMonthString,
     })
     setStatusFilter("all")
   }
@@ -78,7 +80,9 @@ export default function ExpensesPage() {
     }
 
     if (dateFilters.due_date__month) {
-      filtered = filtered.filter((expense) => expense.due_date.includes(dateFilters.due_date__month))
+      filtered = filtered.filter((expense) => 
+        expense.due_date.substring(5, 7) === dateFilters.due_date__month
+      );
     }
 
     if (statusFilter === "pending") {

@@ -12,18 +12,18 @@ import { useCategoryStore } from "@base/store/useCategoryStore"
 type StatusFilter = "all" | "pending" | "paid"
 
 const monthsOfYear = [
-  { value: "01", name: "january" },
-  { value: "02", name: "february" },
-  { value: "03", name: "march" },
-  { value: "04", name: "april" },
-  { value: "05", name: "may" },
-  { value: "06", name: "june" },
-  { value: "07", name: "july" },
-  { value: "08", name: "august" },
-  { value: "09", name: "september" },
-  { value: "10", name: "october" },
-  { value: "11", name: "november" },
-  { value: "12", name: "december" },
+  { value: "01", name: "janeiro" },
+  { value: "02", name: "fevereiro" },
+  { value: "03", name: "março" },
+  { value: "04", name: "abril" },
+  { value: "05", name: "maio" },
+  { value: "06", name: "junho" },
+  { value: "07", name: "julho" },
+  { value: "08", name: "agosto" },
+  { value: "09", name: "setembro" },
+  { value: "10", name: "outubro" },
+  { value: "11", name: "novembro" },
+  { value: "12", name: "dezembro" },
 ]
 
 export default function ExpensesPage() {
@@ -138,7 +138,6 @@ export default function ExpensesPage() {
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
           <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
-            {/* Busca e botões principais */}
             <div className="flex flex-col lg:flex-row items-center gap-4 mb-6">
               <div className="relative flex-1 w-full">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

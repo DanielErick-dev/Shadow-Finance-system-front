@@ -3,7 +3,7 @@ import type React from "react"
 import { useMemo, useEffect, useState } from "react"
 import { useExpensesStore } from "@base/store/useSingleExpensesStore"
 import ExpenseList from "@base/components/single_expenses/ListExpense"
-import { ChevronDown, ChevronUp, Search, X } from "lucide-react"
+import { ChevronDown, ChevronUp, Search, X, Calendar, Filter } from "lucide-react"
 import AddExpenseModalWrapper from "@base/components/single_expenses/AddExpenseModalWrapper"
 import EditExpenseModalWrapper from "@base/components/single_expenses/EditExpenseModalWrapper"
 import type { Expense } from "@base/types/expenses"
@@ -11,66 +11,36 @@ import { useCategoryStore } from "@base/store/useCategoryStore"
 
 type StatusFilter = "all" | "pending" | "paid"
 
+const monthsOfYear = [
+  { value: "01", name: "january" },
+  { value: "02", name: "february" },
+  { value: "03", name: "march" },
+  { value: "04", name: "april" },
+  { value: "05", name: "may" },
+  { value: "06", name: "june" },
+  { value: "07", name: "july" },
+  { value: "08", name: "august" },
+  { value: "09", name: "september" },
+  { value: "10", name: "october" },
+  { value: "11", name: "november" },
+  { value: "12", name: "december" },
+]
+
 export default function ExpensesPage() {
-  const { 
-    expenses, 
-    loading, 
-    error, 
-    fetchExpenses, 
-    deleteExpense,
-    markAsPaid } = useExpensesStore()
-  const { categories, fetchCategories } = useCategoryStore();
+  const { expenses, loading, error, fetchExpenses, deleteExpense, markAsPaid } = useExpensesStore()
+  const { categories, fetchCategories } = useCategoryStore()
   const [isFiltersOpen, setIsFiltersOpen] = useState(true)
   const [searchInput, setSearchInput] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
-  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null);
+  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null)
   const [dateFilters, setDateFilters] = useState({
     due_date__year: "",
     due_date__month: "",
   })
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
-
-  useEffect(() => {
-    if (!dateFilters.due_date__year || !dateFilters.due_date__month) {
-      const now = new Date()
-      setDateFilters({
-        due_date__year: now.getFullYear().toString(),
-        due_date__month: (now.getMonth() + 1).toString(),
-      })
-    }
-  })
-
-  useEffect(() => {
-    if (dateFilters.due_date__year && dateFilters.due_date__month) {
-      const allFilters = {
-        due_date__year: Number(dateFilters.due_date__year),
-        due_date__month: Number(dateFilters.due_date__month),
-        search: searchTerm,
-      }
-      fetchExpenses(allFilters)
-      fetchCategories()
-    }
-  }, [fetchExpenses, fetchCategories, dateFilters, searchTerm])
-
-  const filteredExpenses = useMemo(() => {
-    let filtered = expenses
-    if (statusFilter === "pending") {
-      filtered = filtered.filter((expense) => !expense.paid)
-    } else if (statusFilter === "paid") {
-      filtered = filtered.filter((expense) => expense.paid)
-    }
-    return filtered
-  }, [expenses, statusFilter, searchTerm])
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setDateFilters((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const clearFilters = () => {
-    setDateFilters({ due_date__year: "", due_date__month: "" })
-  }
+  const currentYear = new Date().getFullYear()
+  const availableYears = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString())
 
   const handleSearch = () => {
     setSearchTerm(searchInput)
@@ -81,23 +51,64 @@ export default function ExpensesPage() {
     setSearchTerm("")
   }
 
-  const availableYears = [new Date().getFullYear() + 1, new Date().getFullYear(), new Date().getFullYear() - 1]
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setDateFilters({
+      ...dateFilters,
+      [e.target.name]: e.target.value,
+    })
+  }
 
-  const monthsOfYear = Array.from({ length: 12 }, (_, i) => ({
-    value: i + 1,
-    name: new Date(0, i).toLocaleString("pt-BR", { month: "long" }),
-  }))
+  const clearFilters = () => {
+    setDateFilters({
+      due_date__year: "",
+      due_date__month: "",
+    })
+    setStatusFilter("all")
+  }
+
+  const filteredExpenses = useMemo(() => {
+    let filtered = expenses
+
+    if (searchTerm) {
+      filtered = filtered.filter((expense) => expense.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    }
+
+    if (dateFilters.due_date__year) {
+      filtered = filtered.filter((expense) => expense.due_date.includes(dateFilters.due_date__year))
+    }
+
+    if (dateFilters.due_date__month) {
+      filtered = filtered.filter((expense) => expense.due_date.includes(dateFilters.due_date__month))
+    }
+
+    if (statusFilter === "pending") {
+      filtered = filtered.filter((expense) => !expense.paid)
+    } else if (statusFilter === "paid") {
+      filtered = filtered.filter((expense) => expense.paid)
+    }
+
+    return filtered
+  }, [expenses, searchTerm, dateFilters, statusFilter])
+
+  useEffect(() => {
+    fetchExpenses()
+    fetchCategories()
+  }, [fetchExpenses, fetchCategories])
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
         <div className="relative">
-          <div className="w-12 h-12 border-3 border-purple-900 border-t-purple-400 rounded-full animate-spin"></div>
-          <div className="absolute inset-0 w-12 h-12 border-3 border-transparent border-t-blue-400 rounded-full animate-spin animation-delay-150"></div>
-          <div className="mt-4 text-center">
-            <div className="text-base font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
-              [ CARREGANDO... ]
+          <div className="w-16 h-16 border-4 border-slate-700 border-t-purple-500 rounded-full animate-spin"></div>
+          <div
+            className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"
+            style={{ animationDelay: "0.15s" }}
+          ></div>
+          <div className="mt-6 text-center">
+            <div className="text-lg font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
+              CARREGANDO DESPESAS
             </div>
+            <div className="text-sm text-slate-400 mt-1">Aguarde um momento...</div>
           </div>
         </div>
       </div>
@@ -106,10 +117,16 @@ export default function ExpensesPage() {
 
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center p-6 bg-gradient-to-br from-red-900/20 to-red-800/10 border border-red-500/30 rounded-xl backdrop-blur-sm">
-          <div className="text-xl font-bold text-red-400 mb-2">[ ERRO ]</div>
-          <div className="text-red-300">{error}</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-gradient-to-br from-red-900/20 to-red-800/10 border border-red-500/30 rounded-2xl backdrop-blur-sm max-w-md">
+          <div className="text-2xl font-bold text-red-400 mb-3">ERRO</div>
+          <div className="text-red-300 mb-4">{error}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-medium rounded-lg transition-all duration-200 active:scale-95"
+          >
+            Tentar Novamente
+          </button>
         </div>
       </div>
     )
@@ -117,28 +134,29 @@ export default function ExpensesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4">
-      <div className="relative z-10 max-w-5xl mx-auto">
-        <div className="relative mb-4">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-lg blur"></div>
-          <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-lg p-3">
-            <div className="flex flex-col sm:flex-row items-center gap-3">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
+          <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+            {/* Busca e botões principais */}
+            <div className="flex flex-col lg:flex-row items-center gap-4 mb-6">
               <div className="relative flex-1 w-full">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-slate-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-slate-400" />
                 </div>
                 <input
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="block w-full pl-9 pr-3 py-2 text-sm bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50"
-                  placeholder="Insira o Nome da Despesa"
+                  className="block w-full pl-12 pr-4 py-3 text-sm bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
+                  placeholder="Buscar despesas por nome..."
                 />
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-3 w-full lg:w-auto">
                 <button
                   onClick={handleSearch}
-                  className="flex-1 sm:flex-none px-3 py-2 bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white text-xs font-semibold rounded-lg border border-purple-500/30 shadow-sm hover:shadow-purple-500/20 transition-all duration-300 active:scale-95"
+                  className="flex-1 lg:flex-none px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-medium rounded-xl shadow-lg hover:shadow-purple-500/25 transition-all duration-200 active:scale-95"
                 >
                   Buscar
                 </button>
@@ -146,45 +164,52 @@ export default function ExpensesPage() {
                 {(searchInput || searchTerm) && (
                   <button
                     onClick={clearSearch}
-                    className="flex-1 sm:flex-none px-3 py-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 border border-slate-500/50 rounded-lg text-white text-xs font-medium transition-all duration-300 hover:shadow-sm hover:shadow-slate-500/20 active:scale-95 flex items-center justify-center gap-1"
+                    className="flex-1 lg:flex-none px-4 py-3 bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/50 rounded-xl text-white transition-all duration-200 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                     <span className="hidden sm:inline">Limpar</span>
                   </button>
                 )}
 
                 <button
                   onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                  className="flex-none p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                  className="flex-none p-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 rounded-xl transition-all duration-200 hover:shadow-lg active:scale-95"
                 >
                   {isFiltersOpen ? (
-                    <ChevronUp className="h-4 w-4 text-slate-400" />
+                    <ChevronUp className="h-5 w-5 text-slate-400" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-slate-400" />
+                    <ChevronDown className="h-5 w-5 text-slate-400" />
                   )}
                 </button>
-              </div>
-              <div className="w-full sm:w-auto">
-                <AddExpenseModalWrapper/>
+
+                <div className="w-full lg:w-auto">
+                  <AddExpenseModalWrapper />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {isFiltersOpen && (
-          <div className="mb-4">
-            <div className="relative">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/15 via-blue-600/15 to-purple-600/15 rounded-lg blur"></div>
-              <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-lg p-4">
-                <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <div className="relative group w-full sm:w-auto">
+            {isFiltersOpen && (
+              <div className="border-t border-slate-700/50 pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Filter className="h-5 w-5 text-purple-400" />
+                  <h3 className="text-lg font-semibold text-white">Filtros</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Ano
+                    </label>
                     <select
                       name="due_date__year"
-                      id="due_date__year"
                       value={dateFilters.due_date__year}
                       onChange={handleFilterChange}
-                      className="w-full sm:w-auto text-sm bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-600/50 rounded-lg px-2 py-2 text-white font-medium focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:border-purple-400/50"
+                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
                     >
+                      <option value="" className="bg-slate-800">
+                        Todos os anos
+                      </option>
                       {availableYears.map((year) => (
                         <option key={year} value={year} className="bg-slate-800">
                           {year}
@@ -193,14 +218,17 @@ export default function ExpensesPage() {
                     </select>
                   </div>
 
-                  <div className="relative group w-full sm:w-auto">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Mês</label>
                     <select
                       name="due_date__month"
-                      id="due_date__month"
                       value={dateFilters.due_date__month}
                       onChange={handleFilterChange}
-                      className="w-full sm:w-auto text-sm bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-600/50 rounded-lg px-2 py-2 text-white font-medium focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:border-purple-400/50"
+                      className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
                     >
+                      <option value="" className="bg-slate-800">
+                        Todos os meses
+                      </option>
                       {monthsOfYear.map((month) => (
                         <option key={month.value} value={month.value} className="bg-slate-800">
                           {month.name.charAt(0).toUpperCase() + month.name.slice(1)}
@@ -209,107 +237,79 @@ export default function ExpensesPage() {
                     </select>
                   </div>
 
-                  <button
-                    onClick={clearFilters}
-                    className="relative group w-full sm:w-auto bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 border border-slate-500/50 rounded-lg px-3 py-2 text-sm text-white font-medium transition-all duration-300 hover:shadow-sm hover:shadow-slate-500/20 active:scale-95"
-                  >
-                    <span className="relative z-10">Limpar</span>
-                  </button>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-slate-700/50">
-                  <div className="hidden sm:flex items-center gap-2">
-                    <button
-                      onClick={() => setStatusFilter("all")}
-                      className={`relative group px-4 py-2 text-xs font-medium rounded-lg transition-all duration-300 active:scale-95 ${
-                        statusFilter === "all"
-                          ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm shadow-purple-500/30 border border-purple-400/50"
-                          : "bg-gradient-to-r from-slate-700 to-slate-600 text-slate-300 hover:from-slate-600 hover:to-slate-500 border border-slate-500/50 hover:text-white"
-                      }`}
-                    >
-                      <span className="relative z-10">Todas</span>
-                      {statusFilter === "all" && (
-                        <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-400/20 to-purple-600/20 animate-pulse"></div>
-                      )}
-                    </button>
- 
-                    <button
-                      onClick={() => setStatusFilter("pending")}
-                      className={`relative group px-4 py-2 text-xs font-medium rounded-lg transition-all duration-300 active:scale-95 ${
-                        statusFilter === "pending"
-                          ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-sm shadow-amber-500/30 border border-amber-400/50"
-                          : "bg-gradient-to-r from-slate-700 to-slate-600 text-slate-300 hover:from-slate-600 hover:to-slate-500 border border-slate-500/50 hover:text-white"
-                      }`}
-                    >
-                      <span className="relative z-10">Pendentes</span>
-                      {statusFilter === "pending" && (
-                        <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-amber-400/20 to-amber-600/20 animate-pulse"></div>
-                      )}
-                    </button>
-
-                    <button
-                      onClick={() => setStatusFilter("paid")}
-                      className={`relative group px-4 py-2 text-xs font-medium rounded-lg transition-all duration-300 active:scale-95 ${
-                        statusFilter === "paid"
-                          ? "bg-gradient-to-r from-green-600 to-green-500 text-white shadow-sm shadow-green-500/30 border border-green-400/50"
-                          : "bg-gradient-to-r from-slate-700 to-slate-600 text-slate-300 hover:from-slate-600 hover:to-slate-500 border border-slate-500/50 hover:text-white"
-                      }`}
-                    >
-                      <span className="relative z-10">Concluídas</span>
-                      {statusFilter === "paid" && (
-                        <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-400/20 to-green-600/20 animate-pulse"></div>
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="sm:hidden">
-                    <div className="relative group mt-2">
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-                        className="w-full text-sm bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-600/50 rounded-lg p-2 text-white font-medium focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 hover:border-purple-400/50"
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-medium text-slate-300">Status</label>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setStatusFilter("all")}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 active:scale-95 ${
+                          statusFilter === "all"
+                            ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/25"
+                            : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white border border-slate-600/50"
+                        }`}
                       >
-                        <option value="all" className="bg-slate-800">
-                          Mostrar Todas
-                        </option>
-                        <option value="pending" className="bg-slate-800">
-                          Mostrar Pendentes
-                        </option>
-                        <option value="paid" className="bg-slate-800">
-                          Mostrar Concluídas
-                        </option>
-                      </select>
+                        Todas ({expenses.length})
+                      </button>
+
+                      <button
+                        onClick={() => setStatusFilter("pending")}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 active:scale-95 ${
+                          statusFilter === "pending"
+                            ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg shadow-amber-500/25"
+                            : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white border border-slate-600/50"
+                        }`}
+                      >
+                        Pendentes ({expenses.filter((e) => !e.paid).length})
+                      </button>
+
+                      <button
+                        onClick={() => setStatusFilter("paid")}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 active:scale-95 ${
+                          statusFilter === "paid"
+                            ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/25"
+                            : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white border border-slate-600/50"
+                        }`}
+                      >
+                        Concluídas ({expenses.filter((e) => e.paid).length})
+                      </button>
                     </div>
                   </div>
                 </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={clearFilters}
+                    className="px-6 py-2 bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/50 rounded-xl text-white font-medium transition-all duration-200 hover:shadow-lg active:scale-95"
+                  >
+                    Limpar Filtros
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
 
-        <div className="relative">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-lg blur"></div>
-          <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
-              <h3 className="text-sm font-medium text-slate-200">Lista de Despesas</h3>
-              <div className="ml-auto text-xs text-slate-400 font-mono">
-                {filteredExpenses.length} {filteredExpenses.length === 1 ? "item" : "itens"}
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-2xl blur opacity-75"></div>
+          <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full animate-pulse"></div>
+                <h2 className="text-xl font-semibold text-white">Despesas</h2>
+              </div>
+              <div className="text-sm text-slate-400 font-mono bg-slate-800/50 px-3 py-1 rounded-lg">
+                {filteredExpenses.length} {filteredExpenses.length === 1 ? "despesa" : "despesas"}
               </div>
             </div>
 
-            <div className="relative">
-              <ExpenseList
-                expenses={filteredExpenses}
-                onMarkAsPaid={markAsPaid}
-                onEditExpense={setExpenseToEdit}
-                onDeleteExpense={deleteExpense} 
-              />
-            </div>
-            <EditExpenseModalWrapper
-              expenseToEdit={expenseToEdit}
-              onClose={() => setExpenseToEdit(null)}
+            <ExpenseList
+              expenses={filteredExpenses}
+              onMarkAsPaid={markAsPaid}
+              onEditExpense={setExpenseToEdit}
+              onDeleteExpense={deleteExpense}
             />
+
+            <EditExpenseModalWrapper expenseToEdit={expenseToEdit} onClose={() => setExpenseToEdit(null)} />
           </div>
         </div>
       </div>

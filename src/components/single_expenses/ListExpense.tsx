@@ -1,180 +1,233 @@
-"use client";
+"use client"
 
-import type { Expense, ExpenseFormData} from "@base/types/expenses";
-import { Pencil, Trash2, Calendar, Tag } from "lucide-react";
-import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@base/components/ui/tooltip";
-import { CheckCircle } from "lucide-react";
-import { useConfirmation } from "@base/contexts/ConfirmationDialogContext";
+import type { Expense } from "@base/types/expenses"
+import { Pencil, Trash2, Calendar, Tag, CheckCircle, CreditCard } from "lucide-react"
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@base/components/ui/tooltip"
+import { useConfirmation } from "@base/contexts/ConfirmationDialogContext"
 
 type ExpenseListProps = {
-    expenses: Expense[];
-    onMarkAsPaid: (expenseId: number) => Promise<void>;
-    onDeleteExpense: (expenseId: number) => Promise<void>;
-    onEditExpense: (expense: Expense) => void;
-};
+  expenses: Expense[]
+  onMarkAsPaid: (expenseId: number) => Promise<void>
+  onDeleteExpense: (expenseId: number) => Promise<void>
+  onEditExpense: (expense: Expense) => void
+}
+
 type ExpenseCardProps = {
-    expense: Expense;
-    markAsPaid: (expenseToMark: Expense) => Promise<void>;
-    deleteExpense: (expenseToDeleted: Expense) => Promise<void>;
-    editExpense: (expense: Expense) => void;
+  expense: Expense
+  markAsPaid: (expenseToMark: Expense) => Promise<void>
+  deleteExpense: (expenseToDeleted: Expense) => Promise<void>
+  editExpense: (expense: Expense) => void
 }
 
 function ExpenseCard({ expense, markAsPaid, deleteExpense, editExpense }: ExpenseCardProps) {
-    const isPaid = expense.paid;
-    const statusClasses = isPaid
-        ? "border-green-500/30 hover:border-green-500/60"
-        : "border-amber-500/30 hover:border-amber-500/60";
+  const isPaid = expense.paid
 
-    return (
-        <div
-            className={`bg-slate-900/80 backdrop-blur-sm border rounded-lg overflow-hidden 
-                        ${statusClasses} transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10
-                        flex flex-col h-full`}
-        >
-            <div className="p-4 pb-2">
-                <div className="flex justify-between items-start gap-2">
-                    <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-slate-100 truncate" title={expense.name}>
-                            {expense.name}
-                        </h3>
-                        {expense.category && (
-                            <span className="mt-1 flex items-center gap-1 text-xs text-purple-300 font-mono">
-                                <Tag className="w-3 h-3 flex-shrink-0" />
-                                <span className="truncate">{expense.category.name}</span>
-                            </span>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>  
-                                    <button 
-                                        onClick={() => editExpense(expense)}
-                                        className="p-1.5 rounded-full hover:bg-slate-700 group"
-                                    >
-                                        <Pencil className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-400 cursor-pointer hover:scale-100" />
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                    Editar Despesa
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>  
-                                    <button 
-                                        onClick={() => deleteExpense(expense)}
-                                        className="p-1.5 rounded-full hover:bg-slate-700 group" 
-                                    >
-                                            <Trash2 className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-500 cursor-pointer" />
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                    Deletar Despesa
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                        {!expense.paid && (
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <button
-                                            onClick={() => markAsPaid(expense)}
-                                            className="p-1.5 rounded-full hover:bg-slate-700 group"
-                                        >
-                                            <CheckCircle className="w-3.5 h-3.5 text-slate-400 group-hover:text-green-500"/>
-                                        </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top">
-                                        Marcar Como Paga
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        )}
-                    </div>
+  const getStatusColor = () => {
+    return "from-slate-900/80 to-slate-800/80 border-slate-700/50"
+  }
+
+  const getStatusIndicator = () => {
+    if (isPaid) return "bg-gradient-to-r from-green-500 to-emerald-500"
+    return "bg-gradient-to-r from-purple-500 to-blue-500"
+  }
+
+  return (
+    <div className="group relative">
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+
+      <div
+        className={`relative bg-gradient-to-br ${getStatusColor()} backdrop-blur-xl border rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/10 flex flex-col h-full`}
+      >
+        <div className={`h-1 ${getStatusIndicator()}`}></div>
+
+        <div className="p-4 flex-1 flex flex-col">
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-bold text-slate-100 truncate mb-1" title={expense.name}>
+                {expense.name}
+              </h3>
+              {expense.category && (
+                <div className="flex items-center gap-1.5 text-xs text-purple-300/80">
+                  <Tag className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate font-medium">{expense.category.name}</span>
                 </div>
+              )}
             </div>
 
-            <div className="px-4 pb-4 flex-1 flex flex-col justify-between">
-                <div className="space-y-2 mb-3">
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <Calendar className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
-                        <span className="truncate">
-                            Venc:{" "}
-                            {new Date(expense.due_date + "T00:00:00").toLocaleDateString("pt-BR", { timeZone: "UTC", day: "2-digit", month: "2-digit" })}
-                        </span>
-                    </div>
-                    {expense.payment_date && (
-                        <div className="flex items-center gap-2 text-xs text-green-400">
-                            <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-                            <span className="truncate">
-                                Pago:{" "}
-                                {new Date(expense.payment_date + "T00:00:00").toLocaleDateString("pt-BR", { timeZone: "UTC", day: "2-digit", month: "2-digit" })}
-                            </span>
-                        </div>
-                    )}
-                </div>
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => editExpense(expense)}
+                      className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors"
+                      title="Editar Despesa"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-slate-400 hover:text-blue-400" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Editar Despesa</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-                <div className="space-y-2">
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold w-full text-center ${isPaid ? "bg-green-900/50 text-green-300" : "bg-amber-900/50 text-amber-400"}`}>
-                        {isPaid ? "CONCLUÍDA" : "PENDENTE"}
-                    </span>
-                    <p className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 text-center">
-                        R$ {Number(expense.amount).toFixed(2)}
-                    </p>
-                </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => deleteExpense(expense)}
+                      className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors"
+                      title="Deletar Despesa"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-red-400" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Deletar Despesa</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {!expense.paid && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => markAsPaid(expense)}
+                        className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors"
+                        title="Marcar Como Paga"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5 text-slate-400 hover:text-green-400" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Marcar Como Paga</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
+          </div>
+
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                <span className="font-medium">Vencimento:</span>
+              </div>
+              <span className="text-slate-300 font-mono">
+                {new Date(expense.due_date + "T00:00:00").toLocaleDateString("pt-BR", {
+                  timeZone: "UTC",
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "2-digit",
+                })}
+              </span>
+            </div>
+
+            {expense.payment_date && (
+              <div className="flex items-center gap-2 text-xs text-green-400">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="font-medium">Pagamento:</span>
+                </div>
+                <span className="text-green-300 font-mono">
+                  {new Date(expense.payment_date + "T00:00:00").toLocaleDateString("pt-BR", {
+                    timeZone: "UTC",
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  })}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-auto space-y-3">
+            <div className="text-center">
+              <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+                R$ {Number(expense.amount).toFixed(2)}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center">
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
+                  isPaid
+                    ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-300 border border-green-500/30"
+                    : "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-purple-300 border border-purple-500/30"
+                }`}
+              >
+                {isPaid ? (
+                  <>
+                    <CheckCircle className="w-3 h-3" />
+                    CONCLUÍDA
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-3 h-3" />
+                    PENDENTE
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  )
 }
 
 export default function ExpenseList({ expenses, onMarkAsPaid, onDeleteExpense, onEditExpense }: ExpenseListProps) {
-    const { confirm } = useConfirmation();
-    if (!expenses || expenses.length === 0) {
-        return (
-            <div className="text-center py-16 rounded-xl bg-slate-900 border border-dashed border-slate-700">
-                <svg className="mx-auto h-12 w-12 text-slate-600"></svg>
-                <h3 className="mt-4 text-lg font-medium text-slate-300">Nenhum Registro Encontrado</h3>
-                <p className="mt-1 text-sm text-slate-500">Nenhuma despesa corresponde aos filtros selecionados.</p>
-            </div>
-        );
-    }
-    const handleDeleteExpense = async (expenseToDeleted: Expense) => {
-        if(!expenseToDeleted) return;
-        const isConfirmed = await confirm({
-            title: '[ CONFIRMA EXCLUSÃO ]',
-            description: `voce realmente deseja excluir a despesa: ${expenseToDeleted.name}`,
-            confirmText: 'Sim, Excluir',
-            cancelText: 'Não, Manter'
-        });
-        if(isConfirmed){
-            await onDeleteExpense(expenseToDeleted.id);
-        };
-    }
-    const handleMarkAsPaid = async (expenseToMark: Expense) => {
-        if(!expenseToMark) return;
-        const isConfirmed = await confirm({
-            title: ' [ CONFIRMA ATUALIZAÇÃO ]',
-            description: `voce realmente deseja marcar a despesa: ${expenseToMark.name} como paga?`,
-            confirmText: 'Sim, Marcar como Pago',
-            cancelText: 'Não, Não Marcar'
-        })
-        if(isConfirmed){
-            await onMarkAsPaid(expenseToMark.id)
-        };
-    }
+  const { confirm } = useConfirmation()
+
+  if (!expenses || expenses.length === 0) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {expenses.map((expense) => (
-                <ExpenseCard 
-                    key={expense.id}
-                    expense={expense}
-                    markAsPaid={handleMarkAsPaid}
-                    deleteExpense={handleDeleteExpense}
-                    editExpense={onEditExpense}
-                />
-            ))}
+      <div className="relative">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-slate-600/10 to-slate-500/10 rounded-2xl blur"></div>
+        <div className="relative text-center py-16 rounded-2xl bg-gradient-to-br from-slate-900/50 to-slate-800/50 backdrop-blur-xl border border-slate-700/50">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
+            <CreditCard className="w-8 h-8 text-slate-400" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-300 mb-2">Nenhuma Despesa Encontrada</h3>
+          <p className="text-sm text-slate-500">Nenhuma despesa corresponde aos filtros selecionados.</p>
         </div>
-    );
+      </div>
+    )
+  }
+
+  const handleDeleteExpense = async (expenseToDeleted: Expense) => {
+    if (!expenseToDeleted) return
+    const isConfirmed = await confirm({
+      title: "[ CONFIRMA EXCLUSÃO ]",
+      description: `voce realmente deseja excluir a despesa: ${expenseToDeleted.name}`,
+      confirmText: "Sim, Excluir",
+      cancelText: "Não, Manter",
+    })
+    if (isConfirmed) {
+      await onDeleteExpense(expenseToDeleted.id)
+    }
+  }
+
+  const handleMarkAsPaid = async (expenseToMark: Expense) => {
+    if (!expenseToMark) return
+    const isConfirmed = await confirm({
+      title: " [ CONFIRMA ATUALIZAÇÃO ]",
+      description: `voce realmente deseja marcar a despesa: ${expenseToMark.name} como paga?`,
+      confirmText: "Sim, Marcar como Pago",
+      cancelText: "Não, Não Marcar",
+    })
+    if (isConfirmed) {
+      await onMarkAsPaid(expenseToMark.id)
+    }
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {expenses.map((expense) => (
+        <ExpenseCard
+          key={expense.id}
+          expense={expense}
+          markAsPaid={handleMarkAsPaid}
+          deleteExpense={handleDeleteExpense}
+          editExpense={onEditExpense}
+        />
+      ))}
+    </div>
+  )
 }

@@ -37,8 +37,8 @@ export type InstallmentExpense = {
 
 export type NewInstallmentExpenseData = {
     name: string;
-    total_amount: number;
-    installments_quantity: number;
+    total_amount: string;
+    installments_quantity: string;
     first_due_date: string;
-    category_id: number | null;
+    category_id?: number | null;
 }

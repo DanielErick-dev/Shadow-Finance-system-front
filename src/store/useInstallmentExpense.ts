@@ -8,6 +8,7 @@ type InstallmentsExpenseState = {
     loading: boolean;
     error: string | null;
     fetchInstallmentsExpenses: () => Promise<void>;
+    addInstallmentsExpenses: (installmentExpenseData: NewInstallmentExpenseData) => Promise<void>;
 }
 export const useInstallmentsExpenseStore = create<InstallmentsExpenseState>((set, get) => ({
     loading: false,
@@ -23,5 +24,14 @@ export const useInstallmentsExpenseStore = create<InstallmentsExpenseState>((set
             set({ error: errorMessage});
             toast.error(errorMessage);
         }
-    }
+    },
+    addInstallmentsExpenses: async (installmentExpenseData) => {
+        const promise = api.post('/installments/', installmentExpenseData)
+        await toast.promise(promise, {
+            loading: 'Salvando Despesa Parcelada...',
+            success: 'Despesa Parcelada Criado com Sucesso',
+            error: 'Não foi Possivel adicionar as Despesas, tente novamente'
+        });
+        await get().fetchInstallmentsExpenses();
+    },
 }))

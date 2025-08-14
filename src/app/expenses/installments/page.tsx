@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import AddInstallmentExpenseForm from "@base/components/installments_expenses/AddInstallmentExpenseForm"
 
 export default function InstallmentsPage() {
-  const { error, loading, fetchInstallmentsExpenses, installmentsExpenses, addInstallmentsExpenses } =
+  const { error, loading, fetchInstallmentsExpenses, installmentsExpenses } =
     useInstallmentsExpenseStore()
   const [isAdding, setISAdding] = useState<boolean>(false)
 

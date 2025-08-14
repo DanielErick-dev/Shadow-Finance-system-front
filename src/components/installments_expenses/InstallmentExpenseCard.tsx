@@ -4,9 +4,10 @@ import { Trash2, Pencil, Calendar, CreditCard, DollarSign } from "lucide-react"
 
 type InstallmentExpenseCardProps = {
   installmentExpense: InstallmentExpense
+  onDeleteInstallmentExpense: (installmentExpenseToDeleted: InstallmentExpense) => void;
 }
 
-export default function InstallmentExpenseCard({ installmentExpense }: InstallmentExpenseCardProps) {
+export default function InstallmentExpenseCard({ installmentExpense, onDeleteInstallmentExpense }: InstallmentExpenseCardProps) {
   const installmentAmount = Number(installmentExpense.total_amount) / Number(installmentExpense.installments_quantity)
 
   return (
@@ -32,7 +33,11 @@ export default function InstallmentExpenseCard({ installmentExpense }: Installme
               <Pencil className="w-3.5 h-3.5 text-slate-400 hover:text-blue-400" />
             </button>
 
-            <button className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors" title="Deletar">
+            <button 
+              className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors"
+              title="Deletar"
+              onClick={() => onDeleteInstallmentExpense(installmentExpense)}
+            >
               <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-red-400" />
             </button>
           </div>

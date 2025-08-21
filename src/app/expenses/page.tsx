@@ -6,8 +6,10 @@ import ExpenseList from "@base/components/single_expenses/ListExpense"
 import { ChevronDown, ChevronUp, Search, X, Calendar, Filter } from "lucide-react"
 import AddExpenseModalWrapper from "@base/components/single_expenses/AddExpenseModalWrapper"
 import EditExpenseModalWrapper from "@base/components/single_expenses/EditExpenseModalWrapper"
-import type { Expense } from "@base/types/expenses"
+import type { Expense, MonthlyExpense, RecurringExpense } from "@base/types/expenses"
 import { useCategoryStore } from "@base/store/useCategoryStore"
+import { UseMonthLyExpenseStore } from "@base/store/useMonthlyExpense"
+import { useRecurringExpenseStore } from "@base/store/useRecurringExpense"
 
 type StatusFilter = "all" | "pending" | "paid"
 
@@ -27,39 +29,63 @@ const monthsOfYear = [
 ]
 
 export default function ExpensesPage() {
-  const { expenses, loading, error, fetchExpenses, deleteExpense, markAsPaid } = useExpensesStore()
+  // váriaveis das stores
+  const { createPaidInstance } = useRecurringExpenseStore();
+  const { expenses, loading, error, fetchExpenses} = UseMonthLyExpenseStore();
+  const { expenses: singleExpenses, deleteExpense, markAsPaid } = useExpensesStore()
   const { categories, fetchCategories } = useCategoryStore()
+
+  // váriaveis para filtros
   const [isFiltersOpen, setIsFiltersOpen] = useState(true)
   const [searchInput, setSearchInput] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const now = new Date();
   const currentMonthString = (now.getMonth() + 1).toString().padStart(2, '0')
   const currentYearString = (now.getFullYear());
-  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null)
   const [dateFilters, setDateFilters] = useState({
     due_date__year: currentYearString.toString(),
     due_date__month: currentMonthString,
   })
-
+  const availableYears = Array.from({ length: 11 }, (_, i) => (2023 + i).toString());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
-  const availableYears = Array.from({ length: 5 }, (_, i) => (currentYearString - i).toString())
 
+  const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null)
+
+  // função de mudança de busca
   const handleSearch = () => {
     setSearchTerm(searchInput)
   }
 
+  // função de limpeza de busca
   const clearSearch = () => {
     setSearchInput("")
     setSearchTerm("")
   }
 
+  // função de onChange de datas
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setDateFilters({
       ...dateFilters,
       [e.target.name]: e.target.value,
     })
   }
-
+  const handleMarkAsPaid = async (expense: MonthlyExpense) => {
+    if(!expense.is_recurring){
+      try{
+        await markAsPaid(expense);
+      } catch (error){
+        throw new Error
+      }
+    } else{
+      try{
+        await createPaidInstance(expense);
+      } catch (error){
+        throw new Error
+      }
+    }
+    await fetchExpenses(dateFilters);
+  }
+  // função de limpeza de filtros
   const clearFilters = () => {
     setDateFilters({
       due_date__year: currentYearString.toString(),
@@ -68,21 +94,12 @@ export default function ExpensesPage() {
     setStatusFilter("all")
   }
 
+  // despesas filtradas de acordo com filtro aplicado
   const filteredExpenses = useMemo(() => {
     let filtered = expenses
 
     if (searchTerm) {
       filtered = filtered.filter((expense) => expense.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    }
-
-    if (dateFilters.due_date__year) {
-      filtered = filtered.filter((expense) => expense.due_date.includes(dateFilters.due_date__year))
-    }
-
-    if (dateFilters.due_date__month) {
-      filtered = filtered.filter((expense) => 
-        expense.due_date.substring(5, 7) === dateFilters.due_date__month
-      );
     }
 
     if (statusFilter === "pending") {
@@ -95,9 +112,17 @@ export default function ExpensesPage() {
   }, [expenses, searchTerm, dateFilters, statusFilter])
 
   useEffect(() => {
-    fetchExpenses()
-    fetchCategories()
-  }, [fetchExpenses, fetchCategories])
+    const filters = {
+      due_date__year: dateFilters.due_date__year,
+      due_date__month: dateFilters.due_date__month,
+      search: searchTerm
+    }
+    fetchExpenses(filters)
+  }, [fetchExpenses, dateFilters, searchTerm, singleExpenses])
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories])
 
   if (loading) {
     return (
@@ -210,9 +235,6 @@ export default function ExpensesPage() {
                       onChange={handleFilterChange}
                       className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
                     >
-                      <option value="" className="bg-slate-800">
-                        Todos os anos
-                      </option>
                       {availableYears.map((year) => (
                         <option key={year} value={year} className="bg-slate-800">
                           {year}
@@ -229,9 +251,6 @@ export default function ExpensesPage() {
                       onChange={handleFilterChange}
                       className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
                     >
-                      <option value="" className="bg-slate-800">
-                        Todos os meses
-                      </option>
                       {monthsOfYear.map((month) => (
                         <option key={month.value} value={month.value} className="bg-slate-800">
                           {month.name.charAt(0).toUpperCase() + month.name.slice(1)}
@@ -307,7 +326,7 @@ export default function ExpensesPage() {
 
             <ExpenseList
               expenses={filteredExpenses}
-              onMarkAsPaid={markAsPaid}
+              onMarkAsPaid={handleMarkAsPaid}
               onEditExpense={setExpenseToEdit}
               onDeleteExpense={deleteExpense}
             />

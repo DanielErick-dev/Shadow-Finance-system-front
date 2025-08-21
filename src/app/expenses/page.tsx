@@ -6,12 +6,13 @@ import ExpenseList from "@base/components/single_expenses/ListExpense"
 import { ChevronDown, ChevronUp, Search, X, Calendar, Filter } from "lucide-react"
 import AddExpenseModalWrapper from "@base/components/single_expenses/AddExpenseModalWrapper"
 import EditExpenseModalWrapper from "@base/components/single_expenses/EditExpenseModalWrapper"
-import type { Expense, MonthlyExpense, RecurringExpense } from "@base/types/expenses"
+import type { Expense, MonthlyExpense } from "@base/types/expenses"
 import { useCategoryStore } from "@base/store/useCategoryStore"
 import { UseMonthLyExpenseStore } from "@base/store/useMonthlyExpense"
 import { useRecurringExpenseStore } from "@base/store/useRecurringExpense"
 
 type StatusFilter = "all" | "pending" | "paid"
+type ExpenseTypeFilter = "all" | "recurring" | "simple" | "installment"
 
 const monthsOfYear = [
   { value: "01", name: "janeiro" },
@@ -30,8 +31,8 @@ const monthsOfYear = [
 
 export default function ExpensesPage() {
   // váriaveis das stores
-  const { createPaidInstance } = useRecurringExpenseStore();
-  const { expenses, loading, error, fetchExpenses} = UseMonthLyExpenseStore();
+  const { createPaidInstance } = useRecurringExpenseStore()
+  const { expenses, loading, error, fetchExpenses } = UseMonthLyExpenseStore()
   const { expenses: singleExpenses, deleteExpense, markAsPaid } = useExpensesStore()
   const { categories, fetchCategories } = useCategoryStore()
 
@@ -39,15 +40,16 @@ export default function ExpensesPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(true)
   const [searchInput, setSearchInput] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
-  const now = new Date();
-  const currentMonthString = (now.getMonth() + 1).toString().padStart(2, '0')
-  const currentYearString = (now.getFullYear());
+  const now = new Date()
+  const currentMonthString = (now.getMonth() + 1).toString().padStart(2, "0")
+  const currentYearString = now.getFullYear()
   const [dateFilters, setDateFilters] = useState({
     due_date__year: currentYearString.toString(),
     due_date__month: currentMonthString,
   })
-  const availableYears = Array.from({ length: 11 }, (_, i) => (2023 + i).toString());
+  const availableYears = Array.from({ length: 11 }, (_, i) => (2023 + i).toString())
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
+  const [expenseTypeFilter, setExpenseTypeFilter] = useState<ExpenseTypeFilter>("all")
 
   const [expenseToEdit, setExpenseToEdit] = useState<Expense | null>(null)
 
@@ -70,20 +72,20 @@ export default function ExpensesPage() {
     })
   }
   const handleMarkAsPaid = async (expense: MonthlyExpense) => {
-    if(!expense.is_recurring){
-      try{
-        await markAsPaid(expense);
-      } catch (error){
-        throw new Error
+    if (!expense.is_recurring) {
+      try {
+        await markAsPaid(expense)
+      } catch (error) {
+        throw new Error()
       }
-    } else{
-      try{
-        await createPaidInstance(expense);
-      } catch (error){
-        throw new Error
+    } else {
+      try {
+        await createPaidInstance(expense)
+      } catch (error) {
+        throw new Error()
       }
     }
-    await fetchExpenses(dateFilters);
+    await fetchExpenses(dateFilters)
   }
   // função de limpeza de filtros
   const clearFilters = () => {
@@ -92,6 +94,7 @@ export default function ExpensesPage() {
       due_date__month: currentMonthString,
     })
     setStatusFilter("all")
+    setExpenseTypeFilter("all")
   }
 
   // despesas filtradas de acordo com filtro aplicado
@@ -108,20 +111,24 @@ export default function ExpensesPage() {
       filtered = filtered.filter((expense) => expense.paid)
     }
 
+    if (expenseTypeFilter !== 'all') {
+      filtered = filtered.filter((expense) => expense.expense_type === expenseTypeFilter)
+    }
+
     return filtered
-  }, [expenses, searchTerm, dateFilters, statusFilter])
+  }, [expenses, searchTerm, statusFilter, expenseTypeFilter])
 
   useEffect(() => {
     const filters = {
       due_date__year: dateFilters.due_date__year,
       due_date__month: dateFilters.due_date__month,
-      search: searchTerm
+      search: searchTerm,
     }
     fetchExpenses(filters)
-  }, [fetchExpenses, dateFilters, searchTerm, singleExpenses])
+  }, [fetchExpenses, dateFilters, searchTerm])
 
   useEffect(() => {
-    fetchCategories();
+    fetchCategories()
   }, [fetchCategories])
 
   if (loading) {
@@ -295,6 +302,65 @@ export default function ExpensesPage() {
                         Concluídas ({expenses.filter((e) => e.paid).length})
                       </button>
                     </div>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="text-sm font-medium text-slate-300 mb-3 block">Tipo de Despesa</label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <button
+                      onClick={() => setExpenseTypeFilter("all")}
+                      className={`px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 active:scale-95 ${
+                        expenseTypeFilter === "all"
+                          ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/25"
+                          : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white border border-slate-600/50"
+                      }`}
+                    >
+                      Todas
+                      <div className="text-xs opacity-75 mt-1">({expenses.length})</div>
+                    </button>
+
+                    <button
+                      onClick={() => setExpenseTypeFilter("recurring")}
+                      className={`px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 active:scale-95 ${
+                        expenseTypeFilter === "recurring"
+                          ? "bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg shadow-cyan-500/25"
+                          : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white border border-slate-600/50"
+                      }`}
+                    >
+                      Recorrentes
+                      <div className="text-xs opacity-75 mt-1">
+                        ({expenses.filter((e) => e.expense_type === 'recurring').length})
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setExpenseTypeFilter("simple")}
+                      className={`px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 active:scale-95 ${
+                        expenseTypeFilter === "simple"
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25"
+                          : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white border border-slate-600/50"
+                      }`}
+                    >
+                      Simples
+                      <div className="text-xs opacity-75 mt-1">
+                        ({expenses.filter((e) => e.expense_type === 'simple').length})
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setExpenseTypeFilter("installment")}
+                      className={`px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 active:scale-95 ${
+                        expenseTypeFilter === "installment"
+                          ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-lg shadow-rose-500/25"
+                          : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white border border-slate-600/50"
+                      }`}
+                    >
+                      Parceladas
+                      <div className="text-xs opacity-75 mt-1">
+                        ({expenses.filter((e) => e.expense_type === 'installment').length})
+                      </div>
+                    </button>
                   </div>
                 </div>
 

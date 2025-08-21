@@ -22,6 +22,11 @@ Este repositório contém o código do **Front-End**, desenvolvido com **Next.js
     - Paginação para lidar com grandes volumes de dados.
     - Componentes reutilizáveis (modais, cards) para uma experiência de usuário consistente.
     - Sincronização automática do estado da UI com a API após cada operação.
+- **Gestão de Despesas:**
+    - CRUD completo para despesas simples
+    - Filtros por datas(mês/ano) + status(todos, concluidos, pendentes)
+    - Despesa parcelada que cria automaticamente despesas simples
+    - Despesa Recorrente que se repete todos os meses utilizando virtualização de dados
 - **📱 Design 100% Responsivo:** Interface totalmente adaptada para uma experiência perfeita em desktops e dispositivos móveis.
 
 ---

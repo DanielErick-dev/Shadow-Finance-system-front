@@ -1,6 +1,6 @@
 "use client"
 import type { InstallmentExpense } from "@base/types/expenses"
-import { Trash2, Pencil, Calendar, CreditCard, DollarSign } from "lucide-react"
+import { Trash2, Calendar, CreditCard, DollarSign } from "lucide-react"
 
 type InstallmentExpenseCardProps = {
   installmentExpense: InstallmentExpense
@@ -29,10 +29,6 @@ export default function InstallmentExpenseCard({ installmentExpense, onDeleteIns
           </div>
 
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <button className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors" title="Editar">
-              <Pencil className="w-3.5 h-3.5 text-slate-400 hover:text-blue-400" />
-            </button>
-
             <button 
               className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors"
               title="Deletar"

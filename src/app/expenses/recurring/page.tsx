@@ -6,7 +6,8 @@ import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import AddRecurringExpenseForm from "@base/components/recurring_expenses/AddRecurringExpenseForm";
 import { NewRecurringExpense, RecurringExpense } from "@base/types/expenses";
-
+import LoadingComponent from "@base/components/ui/custom/LoadingComponent";
+import ErrorComponent from "@base/components/ui/custom/ErrorComponent";
 export default function RecurringExpensesPage(){
     const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const [expenseToEdit, setExpenseToEdit] = useState<RecurringExpense | null>(null)
@@ -38,16 +39,13 @@ export default function RecurringExpensesPage(){
         fetchRecurringExpenses();
     }, [fetchRecurringExpenses]);
 
-    if(loading){
-        return(
-            <div>CARREGANDO DESPESAS RECORRENTES...</div>
-        )
-    }
-    if(error){
-        return(
-            <div>NÃO FOI POSSIVEL CARREGAR DESPESAS RECORRENTES</div>
-        )
-    }
+    if (loading) {
+        <LoadingComponent text="CARREGANDO DESPESAS RECORRENTES"/>
+  }
+
+  if (error) {
+    <ErrorComponent error={error} errorMessage="NÃO FOI POSSÍVEL CARREGAR DESPESAS RECORRENTES"/>
+  }
     return(
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800
         to-slate-900 p-4 sm:p-6 lg:p-8">

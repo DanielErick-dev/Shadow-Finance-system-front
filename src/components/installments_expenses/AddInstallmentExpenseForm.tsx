@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect} from "react"
 import type { NewInstallmentExpenseData } from "@base/types/expenses"
 import { useInstallmentsExpenseStore } from "@base/store/useInstallmentExpense"
 import { useCategoryStore } from "@base/store/useCategoryStore"
@@ -16,7 +16,7 @@ type Props = {
 
 export default function AddInstallmentExpenseForm({ onSaveSuccess, onCancel }: Props) {
   const { addInstallmentsExpenses } = useInstallmentsExpenseStore()
-  const { categories } = useCategoryStore()
+  const { categories, fetchCategories } = useCategoryStore()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [formData, setFormData] = useState<NewInstallmentExpenseData>({
     name: "",
@@ -33,7 +33,9 @@ export default function AddInstallmentExpenseForm({ onSaveSuccess, onCancel }: P
       [name]: value,
     }))
   }
-
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories])
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name.trim()) return toast.error("o nome da compra é obrigatório.")

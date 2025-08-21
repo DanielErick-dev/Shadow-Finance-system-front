@@ -1,26 +1,22 @@
 "use client"
 
-import type { Expense } from "@base/types/expenses"
-import { Pencil, Trash2, Calendar, Tag, CheckCircle, CreditCard } from "lucide-react"
+import type { Expense, MonthlyExpense } from "@base/types/expenses"
+import { Pencil, Trash2, Calendar, Tag, CheckCircle, CreditCard, Repeat } from "lucide-react"
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@base/components/ui/tooltip"
 import { useConfirmation } from "@base/contexts/ConfirmationDialogContext"
 
-type ExpenseListProps = {
-  expenses: Expense[]
-  onMarkAsPaid: (expenseId: number) => Promise<void>
-  onDeleteExpense: (expenseId: number) => Promise<void>
-  onEditExpense: (expense: Expense) => void
-}
-
 type ExpenseCardProps = {
-  expense: Expense
-  markAsPaid: (expenseToMark: Expense) => Promise<void>
-  deleteExpense: (expenseToDeleted: Expense) => Promise<void>
-  editExpense: (expense: Expense) => void
+  expense: MonthlyExpense;
+  markAsPaid: (expenseToMark: MonthlyExpense) => Promise<void>
+  deleteExpense: (expenseToDeleted: MonthlyExpense) => Promise<void>
+  editExpense: (expense: MonthlyExpense) => void
 }
 
 function ExpenseCard({ expense, markAsPaid, deleteExpense, editExpense }: ExpenseCardProps) {
   const isPaid = expense.paid
+  const isRecurring = expense.is_recurring
+  const isInstallment = expense.installment_origin
+  const isEditable = !isRecurring && !isInstallment
 
   const getStatusColor = () => {
     return "from-slate-900/80 to-slate-800/80 border-slate-700/50"
@@ -40,12 +36,28 @@ function ExpenseCard({ expense, markAsPaid, deleteExpense, editExpense }: Expens
       >
         <div className={`h-1 ${getStatusIndicator()}`}></div>
 
-        <div className="p-4 flex-1 flex flex-col">
-          <div className="flex justify-between items-start mb-3">
-            <div className="flex-1 min-w-0">
-              <h3 className="text-base font-bold text-slate-100 truncate mb-1" title={expense.name}>
+        <div className="p-5 flex-1 flex flex-col">
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1 min-w-0 pr-2">
+              <h3 className="text-base font-bold text-slate-100 mb-2 leading-tight break-words" title={expense.name}>
                 {expense.name}
               </h3>
+
+              <div className="flex flex-wrap gap-2 mb-2">
+                {isRecurring && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-300 border border-orange-500/30">
+                    <Repeat className="w-3 h-3" />
+                    RECORRENTE
+                  </span>
+                )}
+                {isInstallment && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 border border-blue-500/30">
+                    <CreditCard className="w-3 h-3" />
+                    PARCELA
+                  </span>
+                )}
+              </div>
+
               {expense.category && (
                 <div className="flex items-center gap-1.5 text-xs text-purple-300/80">
                   <Tag className="w-3 h-3 flex-shrink-0" />
@@ -55,35 +67,39 @@ function ExpenseCard({ expense, markAsPaid, deleteExpense, editExpense }: Expens
             </div>
 
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => editExpense(expense)}
-                      className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors"
-                      title="Editar Despesa"
-                    >
-                      <Pencil className="w-3.5 h-3.5 text-slate-400 hover:text-blue-400" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">Editar Despesa</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {isEditable && (
+                <>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => editExpense(expense)}
+                          className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors"
+                          title="Editar Despesa"
+                        >
+                          <Pencil className="w-3.5 h-3.5 text-slate-400 hover:text-blue-400" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Editar Despesa</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
 
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => deleteExpense(expense)}
-                      className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors"
-                      title="Deletar Despesa"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-red-400" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">Deletar Despesa</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => deleteExpense(expense)}
+                          className="p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors"
+                          title="Deletar Despesa"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-red-400" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Deletar Despesa</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </>
+              )}
 
               {!expense.paid && (
                 <TooltipProvider>
@@ -173,6 +189,13 @@ function ExpenseCard({ expense, markAsPaid, deleteExpense, editExpense }: Expens
   )
 }
 
+type ExpenseListProps = {
+  expenses: MonthlyExpense[]
+  onMarkAsPaid: (expenseId:MonthlyExpense) => Promise<void>
+  onDeleteExpense: (expenseId:MonthlyExpense) => Promise<void>
+  onEditExpense: (expense: MonthlyExpense) => void
+}
+
 export default function ExpenseList({ expenses, onMarkAsPaid, onDeleteExpense, onEditExpense }: ExpenseListProps) {
   const { confirm } = useConfirmation()
 
@@ -191,7 +214,7 @@ export default function ExpenseList({ expenses, onMarkAsPaid, onDeleteExpense, o
     )
   }
 
-  const handleDeleteExpense = async (expenseToDeleted: Expense) => {
+  const handleDeleteExpense = async (expenseToDeleted: MonthlyExpense) => {
     if (!expenseToDeleted) return
     const isConfirmed = await confirm({
       title: "[ CONFIRMA EXCLUSÃO ]",
@@ -200,11 +223,11 @@ export default function ExpenseList({ expenses, onMarkAsPaid, onDeleteExpense, o
       cancelText: "Não, Manter",
     })
     if (isConfirmed) {
-      await onDeleteExpense(expenseToDeleted.id)
+      await onDeleteExpense(expenseToDeleted)
     }
   }
 
-  const handleMarkAsPaid = async (expenseToMark: Expense) => {
+  const handleMarkAsPaid = async (expenseToMark: MonthlyExpense) => {
     if (!expenseToMark) return
     const isConfirmed = await confirm({
       title: " [ CONFIRMA ATUALIZAÇÃO ]",
@@ -213,7 +236,7 @@ export default function ExpenseList({ expenses, onMarkAsPaid, onDeleteExpense, o
       cancelText: "Não, Não Marcar",
     })
     if (isConfirmed) {
-      await onMarkAsPaid(expenseToMark.id)
+      await onMarkAsPaid(expenseToMark)
     }
   }
 

@@ -42,3 +42,53 @@ export type NewInstallmentExpenseData = {
     first_due_date: string;
     category_id?: number | null;
 }
+
+export type InstallmentOrigin = {
+    id: number;
+    name: string;
+    total_amount: string;
+    installments_quantity: number;
+    first_due_date: string;
+    category: Category;
+}
+
+export type MonthlyExpense = {
+    id: number;
+    name: string;
+    amount: string;
+    due_date: string;
+    payment_date: string | null;
+    category: Category | null;
+    installment_origin: InstallmentOrigin | null;
+    paid: boolean;
+    created_at: string;
+    is_recurring: boolean;
+}
+
+export type RecurringExpense = {
+    id: number;
+    name: string;
+    amount: string;
+    due_day: number;
+    category: Category | null;
+    active: boolean;
+    start_date: string;
+    end_date: string | null;
+}
+
+export type NewRecurringExpense = {
+    name: string;
+    amount: string;
+    due_day: number;
+    category_id?: number | null | undefined;
+    start_date: string;
+    end_date?: string | null;
+    active?: boolean;
+}
+
+export type PaidRecurringExpenseData = {
+    recurring_expense_id: number;
+    payment_date: string;
+    month: number;
+    year: number;
+}

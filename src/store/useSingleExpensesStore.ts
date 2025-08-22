@@ -56,6 +56,7 @@ export const useExpensesStore = create<ExpensesState>((set, get) => ({
         set(state => ({
             expenses: state.expenses.filter(expense => expense.id !== expenseDeleted.id)
         }))
+        await get().fetchExpenses();
     },
     updateExpense: async (expenseId, expenseData) => {
         const promise = api.put(`/expenses/${expenseId}/`, expenseData)

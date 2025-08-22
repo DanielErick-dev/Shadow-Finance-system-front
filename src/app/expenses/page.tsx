@@ -6,10 +6,11 @@ import ExpenseList from "@base/components/single_expenses/ListExpense"
 import { ChevronDown, ChevronUp, Search, X, Calendar, Filter } from "lucide-react"
 import AddExpenseModalWrapper from "@base/components/single_expenses/AddExpenseModalWrapper"
 import EditExpenseModalWrapper from "@base/components/single_expenses/EditExpenseModalWrapper"
-import type { Expense, MonthlyExpense } from "@base/types/expenses"
+import type { Expense, MonthlyExpense, NewRecurringExpense } from "@base/types/expenses"
 import { useCategoryStore } from "@base/store/useCategoryStore"
 import { UseMonthLyExpenseStore } from "@base/store/useMonthlyExpense"
 import { useRecurringExpenseStore } from "@base/store/useRecurringExpense"
+import { ExpenseFormData } from "@base/types/expenses"
 
 type StatusFilter = "all" | "pending" | "paid"
 type ExpenseTypeFilter = "all" | "recurring" | "simple" | "installment"
@@ -33,7 +34,7 @@ export default function ExpensesPage() {
   // váriaveis das stores
   const { createPaidInstance } = useRecurringExpenseStore()
   const { expenses, loading, error, fetchExpenses } = UseMonthLyExpenseStore()
-  const { expenses: singleExpenses, deleteExpense, markAsPaid } = useExpensesStore()
+  const { deleteExpense, markAsPaid, updateExpense } = useExpensesStore()
   const { categories, fetchCategories } = useCategoryStore()
 
   // váriaveis para filtros
@@ -70,6 +71,21 @@ export default function ExpensesPage() {
       ...dateFilters,
       [e.target.name]: e.target.value,
     })
+  }
+
+  const handleDeleteExpense = async (expense: MonthlyExpense) => {
+    if(expense.is_recurring || expense.installment_origin) return;
+    try{
+      await deleteExpense(expense)
+    } catch (error){
+      throw new Error()
+    }
+    await fetchExpenses(dateFilters);
+  }
+
+  const handleSuccess = async () => {
+    setExpenseToEdit(null);
+    await fetchExpenses(dateFilters);
   }
   const handleMarkAsPaid = async (expense: MonthlyExpense) => {
     if (!expense.is_recurring) {
@@ -218,7 +234,7 @@ export default function ExpensesPage() {
                 </button>
 
                 <div className="w-full lg:w-auto">
-                  <AddExpenseModalWrapper />
+                  <AddExpenseModalWrapper onSuccess={handleSuccess}/>
                 </div>
               </div>
             </div>
@@ -394,10 +410,14 @@ export default function ExpensesPage() {
               expenses={filteredExpenses}
               onMarkAsPaid={handleMarkAsPaid}
               onEditExpense={setExpenseToEdit}
-              onDeleteExpense={deleteExpense}
+              onDeleteExpense={handleDeleteExpense}
             />
 
-            <EditExpenseModalWrapper expenseToEdit={expenseToEdit} onClose={() => setExpenseToEdit(null)} />
+            <EditExpenseModalWrapper
+              expenseToEdit={expenseToEdit}
+              onClose={() => setExpenseToEdit(null)} 
+              onSuccess={handleSuccess}
+            />
           </div>
         </div>
       </div>

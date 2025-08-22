@@ -43,7 +43,7 @@ function SelectionButton({
     )
 }
 
-export default function AddExpenseModalWrapper(){
+export default function AddExpenseModalWrapper({onSuccess} : {onSuccess: () => Promise<void>}){
     const [step, setStep] = useState<ModalStep>('selection');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [modalOpen, setModalOpen] = useState(false)
@@ -61,6 +61,7 @@ export default function AddExpenseModalWrapper(){
         } finally{
             setIsSubmitting(false);
         };
+        await onSuccess()
     };
 
     const renderStepContent = () => {

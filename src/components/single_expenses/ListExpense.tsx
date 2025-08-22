@@ -192,7 +192,7 @@ function ExpenseCard({ expense, markAsPaid, deleteExpense, editExpense }: Expens
 type ExpenseListProps = {
   expenses: MonthlyExpense[]
   onMarkAsPaid: (expenseId:MonthlyExpense) => Promise<void>
-  onDeleteExpense: (expenseId:MonthlyExpense) => Promise<void>
+  onDeleteExpense: (expense:MonthlyExpense) => Promise<void>
   onEditExpense: (expense: MonthlyExpense) => void
 }
 

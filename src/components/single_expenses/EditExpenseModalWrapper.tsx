@@ -10,11 +10,13 @@ import { useCategoryStore } from "@base/store/useCategoryStore";
 type EditExpenseModalWrapperProps = {
     expenseToEdit: Expense | null;
     onClose: () => void;
+    onSuccess: () => Promise<void>;
 };
 
 export default function EditExpenseModalWrapper({
     expenseToEdit,
-    onClose
+    onClose,
+    onSuccess
 }: EditExpenseModalWrapperProps){
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { updateExpense } = useExpensesStore();
@@ -29,6 +31,7 @@ export default function EditExpenseModalWrapper({
         } finally{
             setIsSubmitting(false);
         }
+        await onSuccess();
     };
 
     const isOpen = !!expenseToEdit;

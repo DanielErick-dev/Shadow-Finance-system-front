@@ -6,6 +6,8 @@ import { ExpenseFormData } from "@base/types/expenses";
 import { useExpensesStore } from "@base/store/useSingleExpensesStore";
 import { Layers, Repeat, FilePlus } from "lucide-react";
 import { useCategoryStore } from "@base/store/useCategoryStore";
+import AddRecurringExpenseForm from "../recurring_expenses/AddRecurringExpenseForm";
+import AddInstallmentExpenseForm from "../installments_expenses/AddInstallmentExpenseForm";
 type ModalStep = 'selection' | 'single_expense' | 'recurring' | 'installment'
 
 type SelectionButtonProps = {
@@ -77,17 +79,12 @@ export default function AddExpenseModalWrapper({onSuccess} : {onSuccess: () => P
                     />
                 );
             case 'recurring':
+                return(
+                    <AddRecurringExpenseForm onCancel={handleBack} onSuccess={onSuccess}/>
+                );
             case 'installment':
                 return(
-                    <div className="text-center text-slate-400 py-8">
-                        <p>Esta Funcionalidade está em Desenvolvimento</p>
-                        <button
-                            onClick={handleBack}
-                            className="mt-4 text-purple-400 "
-                        >
-
-                        </button>
-                    </div>
+                    <AddInstallmentExpenseForm onCancel={handleBack} onSaveSuccess={onSuccess}/>
                 );
             case 'selection':
                 default:
@@ -104,14 +101,12 @@ export default function AddExpenseModalWrapper({onSuccess} : {onSuccess: () => P
                                 title='Compra Parcelada'
                                 description="Registre uma Compra e o sistema criará as parcelas"
                                 onClick={() => setStep('installment')}
-                                disabled
                             />
                             <SelectionButton 
                                 icon={<Repeat/>}
                                 title='Despesa Recorrente'
                                 description="Para assinaturas e contratos como: Nextlix, Aluguel"
                                 onClick={() => setStep('recurring')}
-                                disabled
                             />
 
                         </div>
@@ -130,7 +125,9 @@ export default function AddExpenseModalWrapper({onSuccess} : {onSuccess: () => P
 
     const getDescription = () => {
         switch(step){
-            case 'single_expense': return '[ Preencha os detalhes do seu gasto ]';
+            case 'single_expense': return '[ Preencha os Detalhes do seu Gasto ]';
+            case 'recurring': return '[ Preencha os Detalhes da sua Despesa Recorrente ]';
+            case 'installment': return '[ Preencha os Detalhes da sua Despesa Parcelada ]'
             default: return "[ qual tipo de despesa você deseja registrar? ]"
         }
     };
